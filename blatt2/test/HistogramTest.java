@@ -24,7 +24,7 @@ class HistogramTest {
         assertEquals(3.0, histogram.bin(0));
         assertEquals(1.0, histogram.bin(1));
         assertEquals(3.0, histogram.bin(2));
-        assertEquals(7, histogram.getNumSamples());
+        assertEquals(7, histogram.samples());
     }
 
     @Test
@@ -35,7 +35,7 @@ class HistogramTest {
 
         assertEquals(0.0, histogram.bin(0));
         assertEquals(0.0, histogram.bin(1));
-        assertEquals(0, histogram.getNumSamples());
+        assertEquals(0, histogram.samples());
     }
 
     @Test
@@ -59,6 +59,10 @@ class HistogramTest {
 
         private double bin(int index) {
             return getBinValue(index);
+        }
+
+        private long samples() {
+            return numSamples;
         }
     }
 

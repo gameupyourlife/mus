@@ -134,7 +134,7 @@ public abstract class Counter extends StatisticObject{
 		 * Hint: DiscreteCounter and ContinuousCounter pass different values to this method
 		 */
 
-		sumPowerTwo += Math.pow(value, 2);
+		sumPowerTwo += value;
 	}
 	
 	/**
@@ -144,12 +144,7 @@ public abstract class Counter extends StatisticObject{
 	 */
 	@Override
 	public void count(double v, long t) {
-		/**
-		 * TODO Problem 2.1.1 - count
-		 * Implement this function!
-		 * Hint: Take a look at the javadoc comment of this method.
-		 * The timestamp t is only used in the count method of the Continuous Counter.
-		 */
+		// ToDo: This one does not work for the continuous counter, since the min/max is not updated correctly. It needs to be scaled by time. Fix this!
 		if (v > this.getMax()) {
 			this.max = v;
 		}

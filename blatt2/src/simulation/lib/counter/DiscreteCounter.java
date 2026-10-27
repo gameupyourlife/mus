@@ -31,7 +31,7 @@ public class DiscreteCounter extends Counter {
 		var factor = (n / (n - 1.0));
 
 		var firstEmpiricMomentum = getMean();
-		var secondEmpiricMomentum = sumPowerTwo / n;
+		var secondEmpiricMomentum = this.getSumPowerTwo() / n;
 
 		return factor * (secondEmpiricMomentum - Math.pow(firstEmpiricMomentum, 2));
 	}
@@ -43,6 +43,9 @@ public class DiscreteCounter extends Counter {
 	 */
 	@Override
 	public void count(double v, long t) {
+		increaseSumPowerOne(v);
+		increaseSumPowerTwo(Math.pow(v, 2));
+
 		super.count(v, t);
 	}
 

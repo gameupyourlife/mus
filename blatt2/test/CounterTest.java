@@ -18,7 +18,7 @@ class CounterTest {
 
         assertEquals(3, counter.getNumSamples());
         assertEquals(8.0, counter.getSumPowerOne());
-        assertEquals(10.0 / 3.0, counter.getMean(), 1e-12);
+        assertEquals(8.0 / 3.0, counter.getMean(), 1e-12);
         assertEquals(13.0 / 3.0, counter.getVariance(), 1e-12);
         assertEquals(1.0, counter.getMin());
         assertEquals(5.0, counter.getMax());
