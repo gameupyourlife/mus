@@ -1,0 +1,8 @@
+#ContinuousCounter
+#variable ; numSamples ; MEAN; VAR; STD; CVAR; MIN; MAX
+queueOccupancy;20002;0.0;0.0;0.0;0.0;0.0;1.0
+serverUtilization;20002;1.0;0.0;0.0;0.0;1.0;1.0
+queueOccupancy;20002;0.0;0.0;0.0;0.0;0.0;1.0
+serverUtilization;20002;1.0;0.0;0.0;0.0;1.0;1.0
+queueOccupancy;20002;0.0;0.0;0.0;0.0;0.0;1.0
+serverUtilization;20002;1.0;0.0;0.0;0.0;1.0;1.0

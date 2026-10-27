@@ -1,5 +1,7 @@
 package study;
 
+import java.nio.file.Path;
+
 import simulation.lib.Simulator;
 
 /**
@@ -26,6 +28,9 @@ public final class SimulationExperiment {
 
         Simulator simulator = new Simulator(serviceTime, simulationTime);
         simulator.start();
-        simulator.getStudy().printMetrics();
+        SimulationStudy study = simulator.getStudy();
+        study.printMetrics();
+        study.report(Path.of("..", "results", "experiments",
+            "service" + serviceTime + "_T" + simulationTime).toString());
     }
 }

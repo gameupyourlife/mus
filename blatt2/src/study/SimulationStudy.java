@@ -94,10 +94,7 @@ public class SimulationStudy {
 	public long minQS;
 
 	private static final int NUM_HISTOGRAM_INTERVALS = 50;
-	private static final double TIME_HISTOGRAM_LOWER = 0.0;
-	private static final double TIME_HISTOGRAM_UPPER = 100000.0;
 	private static final int QUEUE_HISTOGRAM_LOWER = 0;
-	private static final int QUEUE_HISTOGRAM_UPPER = 100;
 	private static final int UTILIZATION_HISTOGRAM_LOWER = 0;
 	private static final int UTILIZATION_HISTOGRAM_UPPER = 1;
 
@@ -157,13 +154,13 @@ public class SimulationStudy {
 
 		waitingTimeCounter = new DiscreteCounter("waitingTime");
 		waitingTimeHistogram = new DiscreteHistogram("waitingTime", NUM_HISTOGRAM_INTERVALS,
-				TIME_HISTOGRAM_LOWER, TIME_HISTOGRAM_UPPER);
+				0.0, simulator.realTimeToSimTime(expectedWaitingTimeUpperBound()));
 		serviceTimeCounter = new DiscreteCounter("serviceTime");
 		serviceTimeHistogram = new DiscreteHistogram("serviceTime", NUM_HISTOGRAM_INTERVALS,
-				TIME_HISTOGRAM_LOWER, TIME_HISTOGRAM_UPPER);
+				0.0, simulator.realTimeToSimTime(Math.max(cServiceTime + 1, 20)));
 		queueOccupancyCounter = new ContinuousCounter("queueOccupancy");
 		queueOccupancyHistogram = new ContinuousHistogram("queueOccupancy", NUM_HISTOGRAM_INTERVALS,
-				QUEUE_HISTOGRAM_LOWER, QUEUE_HISTOGRAM_UPPER);
+				QUEUE_HISTOGRAM_LOWER, (int) Math.max(100, simulationTime / interArrivalTime + 1));
 		serverUtilizationCounter = new ContinuousCounter("serverUtilization");
 		serverUtilizationHistogram = new ContinuousHistogram("serverUtilization", NUM_HISTOGRAM_INTERVALS,
 				UTILIZATION_HISTOGRAM_LOWER, UTILIZATION_HISTOGRAM_UPPER);
@@ -176,6 +173,14 @@ public class SimulationStudy {
 		statisticObjects.add(queueOccupancyHistogram);
 		statisticObjects.add(serverUtilizationCounter);
 		statisticObjects.add(serverUtilizationHistogram);
+	}
+
+	private double expectedWaitingTimeUpperBound() {
+		if (cServiceTime <= cInterArrivalTime) {
+			return Math.max(cServiceTime, cInterArrivalTime);
+		}
+		return cSimulationTime * (cServiceTime - cInterArrivalTime)
+				/ (double) cInterArrivalTime + cServiceTime;
 	}
 
 	/**
@@ -264,10 +269,18 @@ public class SimulationStudy {
 	public void report() {
 		String sd = new SimpleDateFormat("yyyyMMdd_HHmmss_").format(new Date(System.currentTimeMillis()));
 		String destination = sd + this.getClass().getSimpleName() + (simName.isEmpty() ? "" : "_" + simName);
+		report(destination);
+	}
+
+	/**
+	 * Writes this study's statistic objects to a specified directory.
+	 * @param destination output directory
+	 */
+	public void report(String destination) {
 
 		if (isCsvReport) {
 			File file = new File(destination);
-			file.mkdir();
+			file.mkdirs();
 			for (StatisticObject so : statisticObjects) {
 				so.csvReport(destination);
 			}
