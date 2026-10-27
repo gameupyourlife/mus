@@ -87,7 +87,7 @@ public class Simulator {
 				}
 
 				//set event time as new simtime
-				now = e.getTime();
+				now = e.getTime();	
 				
 				//register for notification
 				e.register(this);
@@ -190,6 +190,7 @@ public class Simulator {
 	 * @param sender SimulationTerminationEvent
 	 */
 	public void stopEventHandler(Object sender) {
+		sims.updateOnSimulationTermination(state, getSimTime());
 		stop();
 	}
 }

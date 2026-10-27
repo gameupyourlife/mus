@@ -62,6 +62,7 @@ public class ContinuousHistogram extends Histogram {
 	@Override
 	public void reset(long time) {
 		super.reset(time);
+		this.numSamples = 0;
 		this.firstSampleTime = time;
 		this.lastSampleTime = time;
 		this.lastSampleSize = 0;

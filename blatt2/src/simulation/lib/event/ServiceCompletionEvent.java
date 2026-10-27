@@ -24,6 +24,7 @@ public class ServiceCompletionEvent extends Event {
 	@Override
 	public void process() {		
 		Customer currentCustomer = state.customerInService;
+		currentCustomer.serviceEndTime = getTime();
 
 		// check queue size
 		if (state.queueSize > 0) {
