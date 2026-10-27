@@ -32,9 +32,18 @@ public class Simulator {
 	 * Pushes first event (customer arrival event) to queue
 	 */
 	public Simulator() {
+		this(9, 100000);
+	}
+
+	/**
+	 * Creates a simulator with configurable service and simulation durations.
+	 * @param serviceTime service time in real-time seconds
+	 * @param simulationTime total simulation time in real-time seconds
+	 */
+	public Simulator(long serviceTime, long simulationTime) {
 		// create event chain
 		ec = new SortableQueue();
-		sims = new SimulationStudy(this);
+		sims = new SimulationStudy(this, serviceTime, simulationTime);
 		state = new SimulationState(sims);
 		// push the first customer arrival at t = 0
 		pushNewEvent(new CustomerArrivalEvent(state, 0));
@@ -133,6 +142,14 @@ public class Simulator {
 	 */
 	public long getSimTime() {
 	    return now;
+	}
+
+	/**
+	 * Returns the study containing this simulation's parameters and statistics.
+	 * @return simulation study
+	 */
+	public SimulationStudy getStudy() {
+		return sims;
 	}
 	
 	/**

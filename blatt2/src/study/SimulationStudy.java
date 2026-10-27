@@ -8,6 +8,7 @@ import java.util.List;
 
 import simulation.lib.Customer;
 import simulation.lib.Simulator;
+import simulation.lib.counter.Counter;
 import simulation.lib.counter.ContinuousCounter;
 import simulation.lib.counter.DiscreteCounter;
 import simulation.lib.histogram.ContinuousHistogram;
@@ -43,18 +44,10 @@ public class SimulationStudy {
 	 *            - none
 	 */
 	public static void main(String[] args) {
-		/*
-		 * create simulation object
-		 */
-		Simulator sim = new Simulator();
-		/*
-		 * run simulation
-		 */
-		sim.start();
-		/*
-		 * print out report
-		 */
-		sim.report();
+		Simulator simulator = new Simulator();
+		simulator.start();
+		simulator.getStudy().printMetrics();
+		simulator.report();
 	}
 
 	// PARAMETERS
@@ -124,7 +117,19 @@ public class SimulationStudy {
 	 * @param sim Simulator instance.
 	 */
 	public SimulationStudy(Simulator sim) {
+		this(sim, 9, 100000);
+	}
+
+	/**
+	 * Constructor with configurable experiment parameters.
+	 * @param sim simulator instance
+	 * @param serviceTime service time in real-time seconds
+	 * @param simulationTime total simulation time in real-time seconds
+	 */
+	public SimulationStudy(Simulator sim, long serviceTime, long simulationTime) {
 		simulator = sim;
+		cServiceTime = serviceTime;
+		cSimulationTime = simulationTime;
 		simulator.setSimTimeInRealTime(1000);
 		setSimulationParameters();
 		initStatistics();
@@ -225,6 +230,21 @@ public class SimulationStudy {
 		double utilization = state.serverBusy ? 1.0 : 0.0;
 		serverUtilizationCounter.count(utilization, simTime);
 		serverUtilizationHistogram.count(utilization, simTime);
+	}
+
+	/**
+	 * Prints the requested mean and coefficient-of-variation metrics.
+	 */
+	public void printMetrics() {
+		printMetric("waiting time per customer", waitingTimeCounter, 0.001);
+		printMetric("service time per customer", serviceTimeCounter, 0.001);
+		printMetric("queue occupancy over time", queueOccupancyCounter, 1.0);
+		printMetric("server utilization over time", serverUtilizationCounter, 1.0);
+	}
+
+	private void printMetric(String name, Counter counter, double meanScale) {
+		System.out.printf("  %-32s mean=%12.6f, cvar=%12.6f%n",
+				name, counter.getMean() * meanScale, counter.getCvar());
 	}
 
 	/**
