@@ -19,12 +19,7 @@ public class DiscreteCounter extends Counter {
 	 */
 	@Override
 	public double getMean() {
-		/**
-		 * TODO Problem 2.1.1 - getMean
-		 * Implement this function!
-		 * Hint: See course syllabus 1.4.1 ff.
-		 */
-		return 0;
+		return sumPowerOne / numSamples;
 	}
 	
 	/**
@@ -32,12 +27,13 @@ public class DiscreteCounter extends Counter {
 	 */
 	@Override
 	public double getVariance() {
-		/**
-		 * TODO Problem 2.1.1 - getVariance
-		 * Implement this function!
-		 * Hint: See course syllabus 1.4.1 ff.
-		 */
-		return 0;
+		var n = numSamples;
+		var factor = (n / (n - 1.0));
+
+		var firstEmpiricMomentum = getMean();
+		var secondEmpiricMomentum = sumPowerTwo / n;
+
+		return factor * (secondEmpiricMomentum - Math.pow(firstEmpiricMomentum, 2));
 	}
 	
 	/**
@@ -47,12 +43,7 @@ public class DiscreteCounter extends Counter {
 	 */
 	@Override
 	public void count(double v, long t) {
-		/**
-		 * TODO Problem 2.1.1 - count
-		 * Implement this function!
-		 * Use the functions already implemented in the super classes.
-		 * The timestamp t is unused, since this is a discrete counter.
-		 */
+		super.count(v, t);
 	}
 
 	/**

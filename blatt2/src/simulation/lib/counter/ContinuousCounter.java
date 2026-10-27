@@ -28,6 +28,8 @@ public class ContinuousCounter extends Counter {
 		 * Implement this function!
 		 * Hint: See course syllabus 1.5.3.2
 		 */
+
+		
 		return 0;
 	}
 	
@@ -59,6 +61,9 @@ public class ContinuousCounter extends Counter {
 		 * Also update lastSampleSize and lastSampleTime
 		 * Hint: See course syllabus 1.5.3.2
 		 */
+
+		// Call this method in the super class
+		super.count(v, t);
 	}
 
 	/**
