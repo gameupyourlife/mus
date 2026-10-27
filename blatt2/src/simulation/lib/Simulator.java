@@ -32,9 +32,28 @@ public class Simulator {
 	 * Pushes first event (customer arrival event) to queue
 	 */
 	public Simulator() {
+		this(9, 100000);
+	}
+
+	/**
+	 * Creates a simulator with configurable service and simulation durations.
+	 * @param serviceTime service time in real-time seconds
+	 * @param simulationTime total simulation time in real-time seconds
+	 */
+	public Simulator(long serviceTime, long simulationTime) {
+		this(serviceTime, simulationTime, false);
+	}
+
+	/**
+	 * Creates a simulator with configurable state-statistics sampling.
+	 * @param serviceTime service time in real-time seconds
+	 * @param simulationTime total simulation time in real-time seconds
+	 * @param discreteStateStatistics use event-based counters for queue and utilization
+	 */
+	public Simulator(long serviceTime, long simulationTime, boolean discreteStateStatistics) {
 		// create event chain
 		ec = new SortableQueue();
-		sims = new SimulationStudy(this);
+		sims = new SimulationStudy(this, serviceTime, simulationTime, discreteStateStatistics);
 		state = new SimulationState(sims);
 		// push the first customer arrival at t = 0
 		pushNewEvent(new CustomerArrivalEvent(state, 0));
@@ -87,7 +106,7 @@ public class Simulator {
 				}
 
 				//set event time as new simtime
-				now = e.getTime();
+				now = e.getTime();	
 				
 				//register for notification
 				e.register(this);
@@ -133,6 +152,14 @@ public class Simulator {
 	 */
 	public long getSimTime() {
 	    return now;
+	}
+
+	/**
+	 * Returns the study containing this simulation's parameters and statistics.
+	 * @return simulation study
+	 */
+	public SimulationStudy getStudy() {
+		return sims;
 	}
 	
 	/**
@@ -190,6 +217,7 @@ public class Simulator {
 	 * @param sender SimulationTerminationEvent
 	 */
 	public void stopEventHandler(Object sender) {
+		sims.updateOnSimulationTermination(state, getSimTime());
 		stop();
 	}
 }

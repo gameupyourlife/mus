@@ -9,46 +9,38 @@ public class ContinuousCounter extends Counter {
 	private long lastSampleTime;
 	private long firstSampleTime;
 	private double lastSampleSize;
-	
+
 	/**
 	 * Constructor
+	 * 
 	 * @param variable the variable to observe
-	 */	
+	 */
 	public ContinuousCounter(String variable) {
 		super(variable);
 	}
-	
+
 	/**
 	 * @see Counter#getMean()
 	 */
 	@Override
 	public double getMean() {
-		/**
-		 * TODO Problem 2.1.1 - getMean
-		 * Implement this function!
-		 * Hint: See course syllabus 1.5.3.2
-		 */
-		return 0;
+		return sumPowerOne / (lastSampleTime - firstSampleTime);
 	}
-	
+
 	/**
 	 * @see Counter#getVariance()
 	 */
 	@Override
 	public double getVariance() {
-		/**
-		 * TODO Problem 2.1.1 - getVariance
-		 * Implement this function!
-		 * Hint: See course syllabus 1.5.3.2 and 1.4.1 ff.
-		 */
-		return 0;
+		return (sumPowerTwo / (lastSampleTime - firstSampleTime)) - Math.pow(getMean(), 2);
 	}
 
 	/**
 	 * Counts a value.
+	 * 
 	 * @param v value to count
 	 * @param t timestamp
-	 * @see	Counter#count(double, long)
+	 * @see Counter#count(double, long)
 	 */
 	@Override
 	public void count(double v, long t) {
@@ -59,6 +51,15 @@ public class ContinuousCounter extends Counter {
 		 * Also update lastSampleSize and lastSampleTime
 		 * Hint: See course syllabus 1.5.3.2
 		 */
+
+		increaseSumPowerOne(lastSampleSize * (t - lastSampleTime));
+		increaseSumPowerTwo(Math.pow(lastSampleSize, 2) * (t - lastSampleTime));
+
+		// Call this method in the super class
+		super.count(v, t);
+
+		lastSampleSize = v;
+		lastSampleTime = t;
 	}
 
 	/**

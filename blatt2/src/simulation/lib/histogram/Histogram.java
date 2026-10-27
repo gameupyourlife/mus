@@ -64,7 +64,14 @@ public abstract class Histogram extends StatisticObject{
 		 * and smaller than the lower bound (return the number of the lowest bin -> 0).
 		 * This way, the histogram is open-ended on both sides
 		 */
-		return 0;
+
+		if(x < lowerBound) {
+			return 0;
+		} else if(x >= upperBound) {
+			return numIntervals - 1;
+		} else {
+			return (int) ((x - lowerBound) / delta);
+		}
 	}
 	
 	/**
@@ -78,6 +85,8 @@ public abstract class Histogram extends StatisticObject{
 		 * Implement this function!
 		 * Hint: Take a look at the javadoc comment of this method
 		 */
+
+		bins[binNumber] += x;
 	}
 	
 	/**
@@ -118,6 +127,7 @@ public abstract class Histogram extends StatisticObject{
      */
     public void reset(long time) {
         this.bins = new double[this.numIntervals];
+		numSamples = 0;
     }
 
 	/**

@@ -8,6 +8,11 @@ import java.util.List;
 
 import simulation.lib.Customer;
 import simulation.lib.Simulator;
+import simulation.lib.counter.Counter;
+import simulation.lib.counter.ContinuousCounter;
+import simulation.lib.counter.DiscreteCounter;
+import simulation.lib.histogram.ContinuousHistogram;
+import simulation.lib.histogram.DiscreteHistogram;
 import simulation.lib.statistic.StatisticObject;
 
 /**
@@ -39,18 +44,10 @@ public class SimulationStudy {
 	 *            - none
 	 */
 	public static void main(String[] args) {
-		/*
-		 * create simulation object
-		 */
-		Simulator sim = new Simulator();
-		/*
-		 * run simulation
-		 */
-		sim.start();
-		/*
-		 * print out report
-		 */
-		sim.report();
+		Simulator simulator = new Simulator();
+		simulator.start();
+		simulator.getStudy().printMetrics();
+		simulator.report();
 	}
 
 	// PARAMETERS
@@ -96,10 +93,20 @@ public class SimulationStudy {
 	 */
 	public long minQS;
 
-	/*
-	 * TODO Problem 2.2 - declaring your statistic objects
-	 * Add the statistic objects as datafields here.
-	 */
+	private static final int NUM_HISTOGRAM_INTERVALS = 50;
+	private static final int QUEUE_HISTOGRAM_LOWER = 0;
+	private static final int UTILIZATION_HISTOGRAM_LOWER = 0;
+	private static final int UTILIZATION_HISTOGRAM_UPPER = 1;
+
+	private DiscreteCounter waitingTimeCounter;
+	private DiscreteHistogram waitingTimeHistogram;
+	private DiscreteCounter serviceTimeCounter;
+	private DiscreteHistogram serviceTimeHistogram;
+	private Counter queueOccupancyCounter;
+	private ContinuousHistogram queueOccupancyHistogram;
+	private Counter serverUtilizationCounter;
+	private ContinuousHistogram serverUtilizationHistogram;
+	private boolean discreteStateStatistics;
 
 	private Simulator simulator;
 
@@ -108,7 +115,32 @@ public class SimulationStudy {
 	 * @param sim Simulator instance.
 	 */
 	public SimulationStudy(Simulator sim) {
+		this(sim, 9, 100000);
+	}
+
+	/**
+	 * Constructor with configurable experiment parameters.
+	 * @param sim simulator instance
+	 * @param serviceTime service time in real-time seconds
+	 * @param simulationTime total simulation time in real-time seconds
+	 */
+	public SimulationStudy(Simulator sim, long serviceTime, long simulationTime) {
+		this(sim, serviceTime, simulationTime, false);
+	}
+
+	/**
+	 * Constructor with configurable state-statistics sampling.
+	 * @param sim simulator instance
+	 * @param serviceTime service time in real-time seconds
+	 * @param simulationTime total simulation time in real-time seconds
+	 * @param discreteStateStatistics use event-based counters for queue and utilization
+	 */
+	public SimulationStudy(Simulator sim, long serviceTime, long simulationTime,
+			boolean discreteStateStatistics) {
 		simulator = sim;
+		cServiceTime = serviceTime;
+		cSimulationTime = simulationTime;
+		this.discreteStateStatistics = discreteStateStatistics;
 		simulator.setSimTimeInRealTime(1000);
 		setSimulationParameters();
 		initStatistics();
@@ -134,9 +166,39 @@ public class SimulationStudy {
 		maxQS = Long.MIN_VALUE;
 		minQS = Long.MAX_VALUE;
 
-		/*
-          TODO Problem 2.2 - initialize statistic objects and add them to the statisticObjects List
-         */
+		waitingTimeCounter = new DiscreteCounter("waitingTime");
+		waitingTimeHistogram = new DiscreteHistogram("waitingTime", NUM_HISTOGRAM_INTERVALS,
+				0.0, simulator.realTimeToSimTime(expectedWaitingTimeUpperBound()));
+		serviceTimeCounter = new DiscreteCounter("serviceTime");
+		serviceTimeHistogram = new DiscreteHistogram("serviceTime", NUM_HISTOGRAM_INTERVALS,
+				0.0, simulator.realTimeToSimTime(Math.max(cServiceTime + 1, 20)));
+		queueOccupancyCounter = discreteStateStatistics
+				? new DiscreteCounter("queueOccupancy")
+				: new ContinuousCounter("queueOccupancy");
+		queueOccupancyHistogram = new ContinuousHistogram("queueOccupancy", NUM_HISTOGRAM_INTERVALS,
+				QUEUE_HISTOGRAM_LOWER, (int) Math.max(100, simulationTime / interArrivalTime + 1));
+		serverUtilizationCounter = discreteStateStatistics
+				? new DiscreteCounter("serverUtilization")
+				: new ContinuousCounter("serverUtilization");
+		serverUtilizationHistogram = new ContinuousHistogram("serverUtilization", NUM_HISTOGRAM_INTERVALS,
+				UTILIZATION_HISTOGRAM_LOWER, UTILIZATION_HISTOGRAM_UPPER);
+
+		statisticObjects.add(waitingTimeCounter);
+		statisticObjects.add(waitingTimeHistogram);
+		statisticObjects.add(serviceTimeCounter);
+		statisticObjects.add(serviceTimeHistogram);
+		statisticObjects.add(queueOccupancyCounter);
+		statisticObjects.add(queueOccupancyHistogram);
+		statisticObjects.add(serverUtilizationCounter);
+		statisticObjects.add(serverUtilizationHistogram);
+	}
+
+	private double expectedWaitingTimeUpperBound() {
+		if (cServiceTime <= cInterArrivalTime) {
+			return Math.max(cServiceTime, cInterArrivalTime);
+		}
+		return cSimulationTime * (cServiceTime - cInterArrivalTime)
+				/ (double) cInterArrivalTime + cServiceTime;
 	}
 
 	/**
@@ -146,13 +208,7 @@ public class SimulationStudy {
 	 */
 	public void updateOnCustomerArrival(SimulationState state, long simTime) {
 		updateQueueSizeBounds(state);
-
-		/*
-		 * TODO Problem 2.2.3 - customer arrival event: update server utilization here
-		 * In a CustomerArrivalEvent, this method is called from the simulator.
-		 * All necessary information is given in the simulation state.
-		 * Update/Count the statistic objects needed.
-		 */
+		updateServerUtilization(state, simTime);
 	}
 
 	/**
@@ -164,11 +220,13 @@ public class SimulationStudy {
 	public void updateOnServiceCompletion(SimulationState state, Customer currentCustomer, long simTime) {
 		updateQueueSizeBounds(state);
 
-		/*
-		 * TODO Problem 2.2.2 & 2.2.3 - update waiting/service time and server utilization measurement objects here
-		 * Use your respective counter and histogram to count the service time of the currentCustomer (getTimeInService())
-		 * and its waiting time (getTimeInQueue())
-		 */
+		long waitingTime = currentCustomer.getTimeInQueue();
+		long serviceTime = currentCustomer.getTimeInService();
+		waitingTimeCounter.count(waitingTime);
+		waitingTimeHistogram.count(waitingTime);
+		serviceTimeCounter.count(serviceTime);
+		serviceTimeHistogram.count(serviceTime);
+		updateServerUtilization(state, simTime);
 	}
 
 	/**
@@ -177,10 +235,41 @@ public class SimulationStudy {
 	 * @param simTime current simulation time
 	 */
 	public void updateQueueOccupancy(SimulationState state, long simTime) {
-		/*
-		 * TODO Problem 2.2.3 - update queue occupancy here
-		 * Count the queue size with your respective statistic objects
-		 */
+		queueOccupancyCounter.count(state.queueSize, simTime);
+		queueOccupancyHistogram.count(state.queueSize, simTime);
+	}
+
+	/**
+	 * Closes the final continuous-statistic interval at simulation termination.
+	 * @param state current simulation state
+	 * @param simTime termination time
+	 */
+	public void updateOnSimulationTermination(SimulationState state, long simTime) {
+		if (!discreteStateStatistics) {
+			updateQueueOccupancy(state, simTime);
+			updateServerUtilization(state, simTime);
+		}
+	}
+
+	private void updateServerUtilization(SimulationState state, long simTime) {
+		double utilization = state.serverBusy ? 1.0 : 0.0;
+		serverUtilizationCounter.count(utilization, simTime);
+		serverUtilizationHistogram.count(utilization, simTime);
+	}
+
+	/**
+	 * Prints the requested mean and coefficient-of-variation metrics.
+	 */
+	public void printMetrics() {
+		printMetric("waiting time per customer", waitingTimeCounter, 0.001);
+		printMetric("service time per customer", serviceTimeCounter, 0.001);
+		printMetric("queue occupancy over time", queueOccupancyCounter, 1.0);
+		printMetric("server utilization over time", serverUtilizationCounter, 1.0);
+	}
+
+	private void printMetric(String name, Counter counter, double meanScale) {
+		System.out.printf("  %-32s mean=%12.6f, cvar=%12.6f%n",
+				name, counter.getMean() * meanScale, counter.getCvar());
 	}
 
 	/**
@@ -200,10 +289,18 @@ public class SimulationStudy {
 	public void report() {
 		String sd = new SimpleDateFormat("yyyyMMdd_HHmmss_").format(new Date(System.currentTimeMillis()));
 		String destination = sd + this.getClass().getSimpleName() + (simName.isEmpty() ? "" : "_" + simName);
+		report(destination);
+	}
+
+	/**
+	 * Writes this study's statistic objects to a specified directory.
+	 * @param destination output directory
+	 */
+	public void report(String destination) {
 
 		if (isCsvReport) {
 			File file = new File(destination);
-			file.mkdir();
+			file.mkdirs();
 			for (StatisticObject so : statisticObjects) {
 				so.csvReport(destination);
 			}

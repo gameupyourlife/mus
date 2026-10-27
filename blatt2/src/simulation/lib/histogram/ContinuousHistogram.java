@@ -36,6 +36,16 @@ public class ContinuousHistogram extends Histogram {
 		 * Also update lastSampleSize and lastSampleTime appropriately
 		 * Hint: See course syllabus 1.5.4
 		 */
+
+		var binNumber = getBinNumber(lastSampleSize);
+		var timeDifference = t - lastSampleTime;
+
+		incrementBin(binNumber, timeDifference);
+		
+		super.count(v, t);
+
+		lastSampleSize = v;
+		lastSampleTime = t;
 	}
 	
 	/**
@@ -52,6 +62,7 @@ public class ContinuousHistogram extends Histogram {
 	@Override
 	public void reset(long time) {
 		super.reset(time);
+		this.numSamples = 0;
 		this.firstSampleTime = time;
 		this.lastSampleTime = time;
 		this.lastSampleSize = 0;

@@ -40,15 +40,13 @@ public abstract class Event extends SortableQueueItem {
 	public int compareTo(SortableQueueItem o) {
 		if (o instanceof Event) {
 			Event e = (Event) o;
-			if(equals(o)) {
-				return 0;
-			}
 			if(eventTime < e.eventTime) {
 				return -1;
 			}
 			if(eventTime > e.eventTime) {
 				return 1;
 			}
+			return 0;
 		}
 		return 1;
 	}

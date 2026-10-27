@@ -1,0 +1,8 @@
+#DiscreteCounter
+#variable ; numSamples ; MEAN; VAR; STD; CVAR; MIN; MAX
+waitingTime;10000;0.0;0.0;0.0;0.0;0.0;0.0
+serviceTime;10000;9000.0;0.0;0.0;0.0;9000.0;9000.0
+waitingTime;10000;0.0;0.0;0.0;0.0;0.0;0.0
+serviceTime;10000;9000.0;0.0;0.0;0.0;9000.0;9000.0
+waitingTime;10000;0.0;0.0;0.0;0.0;0.0;0.0
+serviceTime;10000;9000.0;0.0;0.0;0.0;9000.0;9000.0

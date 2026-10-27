@@ -53,12 +53,7 @@ public abstract class Counter extends StatisticObject{
 	 * @return the standard deviation
 	 */
 	public double getStdDeviation() {
-		/**
-		 * TODO Problem 2.1.1 - getStdDeviation
-		 * You can use other methods of this class in order to calculate the standard deviation
-		 * Hint: See course syllabus 1.3.4
-		 */
-		return 0;
+		return Math.sqrt(getVariance());
 	}
 	
 	/**
@@ -115,6 +110,8 @@ public abstract class Counter extends StatisticObject{
 		 * This method updates internal data "sumPowerOne" which is needed for the calculation of empirical moments
 		 * Hint: DiscreteCounter and ContinuousCounter pass different values to this method
 		 */
+
+		sumPowerOne += value;
 	}
 	
 	/**
@@ -136,6 +133,8 @@ public abstract class Counter extends StatisticObject{
 		 * This method updates internal data "sumPowerTwo" which is needed for the calculation of empirical moments
 		 * Hint: DiscreteCounter and ContinuousCounter pass different values to this method
 		 */
+
+		sumPowerTwo += value;
 	}
 	
 	/**
@@ -145,12 +144,17 @@ public abstract class Counter extends StatisticObject{
 	 */
 	@Override
 	public void count(double v, long t) {
-		/**
-		 * TODO Problem 2.1.1 - count
-		 * Implement this function!
-		 * Hint: Take a look at the javadoc comment of this method.
-		 * The timestamp t is only used in the count method of the Continuous Counter.
-		 */
+		// ToDo: This one does not work for the continuous counter, since the min/max is not updated correctly. It needs to be scaled by time. Fix this!
+		if (v > this.getMax()) {
+			this.max = v;
+		}
+		
+		if (v < this.getMin()) {
+			this.min = v;
+		}
+		
+		// Increment the number of samples via superclass method
+		super.count(v, t);
 	}
 	
 	/**

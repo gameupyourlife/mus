@@ -32,6 +32,12 @@ public class DiscreteHistogram extends Histogram {
 		 * Also update numSamples
 		 * Hint: See course syllabus 1.5.2
 		 */
+
+		var binNumber = getBinNumber(v);
+		incrementBin(binNumber, 1.0);
+
+		// Num of samples is updated in the super class
+		super.count(v, t);
 	}
 
 	public void count(double v) {
