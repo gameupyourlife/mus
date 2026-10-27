@@ -20,8 +20,11 @@ import simulation.lib.statistic.DiscreteCounterHistogram;
  */
 public class RunStatisticsTest {
 
-    /** Directory containing the generated CSV files. */
-    static final String DATA_DIR = "./";
+    /** Directory containing the input CSV files. */
+    static final String DATA_DIR = "./blatt2/src/tests/";
+
+    /** Directory containing generated CSV files. */
+    static final String RESULTS_DIR = "./results/";
 
     /** Number of histogram intervals. */
     static final int NUM_INTERVALS = 50;
@@ -37,7 +40,7 @@ public class RunStatisticsTest {
     public static void main(String[] args) throws IOException {
         System.out.println("Normal Distribution");
         runTest(
-            DATA_DIR + "normal_samples.csv",
+            DATA_DIR + "testsnormal_samples.csv",
             "normal",
             NORMAL_HIST_LOWER,
             NORMAL_HIST_UPPER
@@ -45,7 +48,7 @@ public class RunStatisticsTest {
 
         System.out.println("Uniform Distribution");
         runTest(
-            DATA_DIR + "uniform_samples.csv",
+            DATA_DIR + "testsuniform_samples.csv",
             "uniform",
             UNIFORM_HIST_LOWER,
             UNIFORM_HIST_UPPER
@@ -63,7 +66,7 @@ public class RunStatisticsTest {
      */
     private static void runTest(String csvPath, String name,
                                  double lower, double upper) throws IOException {
-        new File(DATA_DIR + "results/").mkdirs();
+        new File(RESULTS_DIR).mkdirs();
         double[] samples = readCsv(csvPath);
         System.out.println("Loaded " + samples.length + " samples from: " + csvPath);
 
@@ -77,7 +80,7 @@ public class RunStatisticsTest {
 
         System.out.println("\n-- Discrete --");
         System.out.println(discrete.report());
-        discrete.csvReport(DATA_DIR + "results/");
+        discrete.csvReport(RESULTS_DIR);
 
         //Continuous
         ContinuousCounterHistogram continuous =
@@ -90,7 +93,7 @@ public class RunStatisticsTest {
 
         System.out.println("-- Continuous --");
         System.out.println(continuous.report());
-        continuous.csvReport(DATA_DIR + "results/");
+        continuous.csvReport(RESULTS_DIR);
     }
 
     /**
