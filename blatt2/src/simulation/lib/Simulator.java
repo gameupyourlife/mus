@@ -41,9 +41,19 @@ public class Simulator {
 	 * @param simulationTime total simulation time in real-time seconds
 	 */
 	public Simulator(long serviceTime, long simulationTime) {
+		this(serviceTime, simulationTime, false);
+	}
+
+	/**
+	 * Creates a simulator with configurable state-statistics sampling.
+	 * @param serviceTime service time in real-time seconds
+	 * @param simulationTime total simulation time in real-time seconds
+	 * @param discreteStateStatistics use event-based counters for queue and utilization
+	 */
+	public Simulator(long serviceTime, long simulationTime, boolean discreteStateStatistics) {
 		// create event chain
 		ec = new SortableQueue();
-		sims = new SimulationStudy(this, serviceTime, simulationTime);
+		sims = new SimulationStudy(this, serviceTime, simulationTime, discreteStateStatistics);
 		state = new SimulationState(sims);
 		// push the first customer arrival at t = 0
 		pushNewEvent(new CustomerArrivalEvent(state, 0));

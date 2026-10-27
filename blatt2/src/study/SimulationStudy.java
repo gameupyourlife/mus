@@ -102,10 +102,11 @@ public class SimulationStudy {
 	private DiscreteHistogram waitingTimeHistogram;
 	private DiscreteCounter serviceTimeCounter;
 	private DiscreteHistogram serviceTimeHistogram;
-	private ContinuousCounter queueOccupancyCounter;
+	private Counter queueOccupancyCounter;
 	private ContinuousHistogram queueOccupancyHistogram;
-	private ContinuousCounter serverUtilizationCounter;
+	private Counter serverUtilizationCounter;
 	private ContinuousHistogram serverUtilizationHistogram;
+	private boolean discreteStateStatistics;
 
 	private Simulator simulator;
 
@@ -124,9 +125,22 @@ public class SimulationStudy {
 	 * @param simulationTime total simulation time in real-time seconds
 	 */
 	public SimulationStudy(Simulator sim, long serviceTime, long simulationTime) {
+		this(sim, serviceTime, simulationTime, false);
+	}
+
+	/**
+	 * Constructor with configurable state-statistics sampling.
+	 * @param sim simulator instance
+	 * @param serviceTime service time in real-time seconds
+	 * @param simulationTime total simulation time in real-time seconds
+	 * @param discreteStateStatistics use event-based counters for queue and utilization
+	 */
+	public SimulationStudy(Simulator sim, long serviceTime, long simulationTime,
+			boolean discreteStateStatistics) {
 		simulator = sim;
 		cServiceTime = serviceTime;
 		cSimulationTime = simulationTime;
+		this.discreteStateStatistics = discreteStateStatistics;
 		simulator.setSimTimeInRealTime(1000);
 		setSimulationParameters();
 		initStatistics();
@@ -158,10 +172,14 @@ public class SimulationStudy {
 		serviceTimeCounter = new DiscreteCounter("serviceTime");
 		serviceTimeHistogram = new DiscreteHistogram("serviceTime", NUM_HISTOGRAM_INTERVALS,
 				0.0, simulator.realTimeToSimTime(Math.max(cServiceTime + 1, 20)));
-		queueOccupancyCounter = new ContinuousCounter("queueOccupancy");
+		queueOccupancyCounter = discreteStateStatistics
+				? new DiscreteCounter("queueOccupancy")
+				: new ContinuousCounter("queueOccupancy");
 		queueOccupancyHistogram = new ContinuousHistogram("queueOccupancy", NUM_HISTOGRAM_INTERVALS,
 				QUEUE_HISTOGRAM_LOWER, (int) Math.max(100, simulationTime / interArrivalTime + 1));
-		serverUtilizationCounter = new ContinuousCounter("serverUtilization");
+		serverUtilizationCounter = discreteStateStatistics
+				? new DiscreteCounter("serverUtilization")
+				: new ContinuousCounter("serverUtilization");
 		serverUtilizationHistogram = new ContinuousHistogram("serverUtilization", NUM_HISTOGRAM_INTERVALS,
 				UTILIZATION_HISTOGRAM_LOWER, UTILIZATION_HISTOGRAM_UPPER);
 
@@ -227,8 +245,10 @@ public class SimulationStudy {
 	 * @param simTime termination time
 	 */
 	public void updateOnSimulationTermination(SimulationState state, long simTime) {
-		updateQueueOccupancy(state, simTime);
-		updateServerUtilization(state, simTime);
+		if (!discreteStateStatistics) {
+			updateQueueOccupancy(state, simTime);
+			updateServerUtilization(state, simTime);
+		}
 	}
 
 	private void updateServerUtilization(SimulationState state, long simTime) {
