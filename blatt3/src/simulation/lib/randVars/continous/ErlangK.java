@@ -4,64 +4,78 @@ import simulation.lib.randVars.RandVar;
 import simulation.lib.rng.RNG;
 
 /*
- * TODO Problem 3.1.2 - implement this class (section 3.2.3 in course syllabus)
- * !!! If an abstract class method does not make sense to be implemented in a particular RandVar class,
- * an UnsupportedOperationException should be thrown !!!
- *
  * Erlang-k distributed random variable.
  */
 public class ErlangK extends RandVar {
+    private int k = 1;
+    private double mean = 1.0;
 
     public ErlangK(RNG rng) {
         super(rng);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     public double getRV() {
-        // TODO Auto-generated method stub
-        return 0;
+        double sum = 0.0;
+        for (int i = 0; i < k; i++) {
+            sum -= Math.log1p(-rng.rnd());
+        }
+        return (sum / k) * mean;
     }
 
     @Override
     public double getMean() {
-        // TODO Auto-generated method stub
-        return 0;
+        return mean;
     }
 
     @Override
     public double getVariance() {
-        // TODO Auto-generated method stub
-        return 0;
+        double stdDeviation = mean / Math.sqrt(k);
+        return stdDeviation * stdDeviation;
     }
 
     @Override
     public void setMean(double m) {
-        // TODO Auto-generated method stub
+        requirePositive(m, "Mean");
+        mean = m;
 
     }
 
     @Override
     public void setStdDeviation(double s) {
-        // TODO Auto-generated method stub
+        requirePositive(s, "Standard deviation");
+        setMean(s * Math.sqrt(k));
 
     }
 
     @Override
     public void setMeanAndStdDeviation(double m, double s) {
-        // TODO Auto-generated method stub
+        requirePositive(m, "Mean");
+        requirePositive(s, "Standard deviation");
+        double cvar = s / m;
+        long shape = Math.round(1.0 / (cvar * cvar));
+        if (shape < 1 || shape > Integer.MAX_VALUE
+                || Math.abs(cvar - 1.0 / Math.sqrt(shape)) > 4 * Math.ulp(cvar)) {
+            throw new UnsupportedOperationException("Erlang CV must equal 1/sqrt(k) for an integer k >= 1.");
+        }
+        k = (int) shape;
+        mean = m;
+    }
+
+    private static void requirePositive(double value, String name) {
+        if (!Double.isFinite(value) || value <= 0.0) {
+            throw new IllegalArgumentException(name + " must be finite and positive.");
+        }
 
     }
 
     @Override
     public String getType() {
-        // TODO Auto-generated method stub
-        return null;
+        return "Erlang-k";
     }
 
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
-        return null;
+        return "Erlang(k=" + k + ")";
     }
 }

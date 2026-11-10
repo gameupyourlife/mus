@@ -4,65 +4,73 @@ import simulation.lib.randVars.RandVar;
 import simulation.lib.rng.RNG;
 
 /*
- * TODO Problem 3.1.2 - implement this class (section 3.2.1 in course syllabus)
- * !!! If an abstract class method does not make sense to be implemented in a particular RandVar class,
- * an UnsupportedOperationException should be thrown !!!
- *
  * Uniform distributed random variable.
  */
 public class Uniform extends RandVar {
+	private double lower;
+	private double upper;
 
 	public Uniform(RNG rng) {
+		this(rng, 0.0, 1.0);
+	}
+
+	public Uniform(RNG rng, double lower, double upper) {
 		super(rng);
-		// TODO Auto-generated constructor stub
+		setBounds(lower, upper);
+	}
+
+	private void setBounds(double lower, double upper) {
+		if (!Double.isFinite(lower) || !Double.isFinite(upper) || lower >= upper) {
+			throw new IllegalArgumentException("Uniform requires finite, increasing bounds.");
+		}
+		this.lower = lower;
+		this.upper = upper;
 	}
 
 	@Override
 	public double getRV() {
-		// TODO Auto-generated method stub
-		return 0;
+		double u = rng.rnd();
+		return (1.0 - u) * lower + u * upper;
 	}
 
 	@Override
 	public double getMean() {
-		// TODO Auto-generated method stub
-		return 0;
+		return lower / 2.0 + upper / 2.0;
 	}
 
 	@Override
 	public double getVariance() {
-		// TODO Auto-generated method stub
-		return 0;
+		double stdDeviation = (upper / 2.0 - lower / 2.0) / Math.sqrt(3.0);
+		return stdDeviation * stdDeviation;
 	}
 
 	@Override
 	public void setMean(double m) {
-		// TODO Auto-generated method stub
+		setMeanAndStdDeviation(m, getStdDeviation());
 
 	}
 
 	@Override
 	public void setStdDeviation(double s) {
-		// TODO Auto-generated method stub
+		setMeanAndStdDeviation(getMean(), s);
 
 	}
 
 	@Override
 	public void setMeanAndStdDeviation(double m, double s) {
-		// TODO Auto-generated method stub
+		double halfWidth = Math.sqrt(3.0) * s;
+		setBounds(m - halfWidth, m + halfWidth);
 
 	}
 
 	@Override
 	public String getType() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Uniform";
 	}
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Uniform{lower=" + lower + ", upper=" + upper + '}';
 	}
 
 }

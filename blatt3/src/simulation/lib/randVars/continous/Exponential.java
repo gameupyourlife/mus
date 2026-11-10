@@ -4,65 +4,99 @@ import simulation.lib.randVars.RandVar;
 import simulation.lib.rng.RNG;
 
 /*
- * TODO Problem 3.1.2 - implement this class (section 3.2.2 in course syllabus)
- * !!! If an abstract class method does not make sense to be implemented in a particular RandVar class,
- * an UnsupportedOperationException should be thrown !!!
- *
- * Expnential distributed random variable.
+ * Exponentially distributed random variable.
  */
 public class Exponential extends RandVar {
+	private double lambda;
 
 	public Exponential(RNG rng) {
+		this(rng, 1.0);
+	}
+
+	public Exponential(RNG rng, double lambda) {
 		super(rng);
-		// TODO Auto-generated constructor stub
+		setRate(lambda);
+	}
+
+	private void setRate(double lambda) {
+		if (!Double.isFinite(lambda) || lambda <= 0.0) {
+			throw new IllegalArgumentException("Rate must be finite and positive.");
+		}
+		this.lambda = lambda;
 	}
 
 	@Override
 	public double getRV() {
-		// TODO Auto-generated method stub
-		return 0;
+		return sample(rng, lambda);
+	}
+
+	static double sample(RNG rng, double rate) {
+		return -Math.log1p(-rng.rnd()) / rate;
 	}
 
 	@Override
 	public double getMean() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1 / lambda;
 	}
 
 	@Override
 	public double getVariance() {
-		// TODO Auto-generated method stub
-		return 0;
+		double mean = getMean();
+		return mean * mean;
+	}
+
+	@Override
+	public double getStdDeviation() {
+		return getMean();
+	}
+
+	@Override
+	public double getCvar() {
+		return 1.0;
 	}
 
 	@Override
 	public void setMean(double m) {
-		// TODO Auto-generated method stub
-
+		setRate(1.0 / m);
 	}
 
 	@Override
 	public void setStdDeviation(double s) {
-		// TODO Auto-generated method stub
-
+		setMean(s);
 	}
 
 	@Override
 	public void setMeanAndStdDeviation(double m, double s) {
-		// TODO Auto-generated method stub
+		if (!Double.isFinite(m) || m <= 0.0 || !Double.isFinite(s) || s <= 0.0) {
+			throw new IllegalArgumentException("Mean and standard deviation must be finite and positive.");
+		}
+		if (m != s) {
+			throw new UnsupportedOperationException("Mean and standard deviation must be equal for exponential distribution.");
+		}
+		setMean(m);
+	}
 
+	@Override
+	public void setCvar(double c) {
+		if (c != 1.0) {
+			throw new UnsupportedOperationException("Exponential CV is always 1.");
+		}
+	}
+
+	@Override
+	public void setMeanAndCvar(double m, double c) {
+		setCvar(c);
+		setMean(m);
 	}
 
 	@Override
 	public String getType() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Exponential";
 	}
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Exponential{lambda=" + lambda + '}';
 	}
 
 }

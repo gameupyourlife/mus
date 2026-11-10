@@ -1,0 +1,34 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[margin=2.5cm]{geometry}
+
+\begin{document}
+
+\section*{Blatt 3, Aufgabe 3.1.4: Histogramme}
+
+\textbf{Gleichverteilung.}
+Mit größerem Variationskoeffizienten (CV) verteilen sich die Werte über ein
+breiteres Intervall. Die Balken im Inneren sind ungefähr gleich hoch. Der
+auffällig hohe erste Balken bei CV~1 und CV~2 entsteht durch die negativen
+Werte. Sie machen \(21{,}04\,\%\) bzw. \(35{,}53\,\%\) der Stichprobe aus und
+werden dem ersten Interval hinzugerechnet.
+
+\medskip
+\noindent\textbf{Exponential- und Erlang-Verteilung.}
+Bei CV~1 fallen die Balken bei beiden Verteilungen von links nach rechts ab.
+Das passt dazu, dass die Erlang-Verteilung mit \(k=1\) eine
+Exponentialverteilung ist. Bei \(k=100\) liegen die Werte dagegen dicht um den
+Mittelwert 1. Das Histogramm sieht dort annähernd glockenförmig aus. Dies deckt sich mit der möglichen Aproximation durch die Normalverteilung.
+
+\medskip
+\noindent\textbf{Hyperexponentialverteilung \(H_2\).}
+Bei CV~1 sind beide Raten gleich, daher hat das Histogramm wieder die Form
+einer Exponentialverteilung. Bei CV~2 sieht man mehr sehr kleine Werte und
+zugleich deutlich mehr große Werte. Rund \(1{,}19\,\%\) der Ziehungen liegen
+bei 10 oder darüber. Bei der Exponentialverteilung sind es nur
+\(0{,}0042\,\%\). Die Werte ab 10 landen im letzen Intervall, dementsprechend der Peak.
+
+
+\end{document}

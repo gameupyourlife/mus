@@ -1,0 +1,39 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[margin=2.5cm]{geometry}
+
+\begin{document}
+
+\section*{Blatt 3, Aufgabe 3.1.4: Konfidenzintervalle}
+
+\textbf{Bedeutung eines zweiseitigen Konfidenzintervalls für
+\(\alpha=0{,}05\).}
+Ein zweiseitiges Konfidenzintervall hat das Konfidenzniveau
+\(1-\alpha=0{,}95\), also \(95\,\%\). Die Irrtumswahrscheinlichkeit
+\(\alpha\) wird gleichmäßig auf beide Seiten verteilt:
+\(\alpha/2=0{,}025\) liegt jeweils im linken und im rechten Rand der
+Verteilung. Bei wiederholter Anwendung des Verfahrens enthalten daher
+\(95\,\%\) der so berechneten Intervalle den wahren Parameter. Für den
+unbekannten Mittelwert lautet das Intervall bei Verwendung der
+Student-\(t\)-Verteilung beispielsweise
+\[
+\bar{x}\mathbin{\pm}t_{n-1,\,1-\alpha/2}\frac{s}{\sqrt{n}}.
+\]
+
+\medskip
+\noindent Für \(\alpha=0{,}05\) gilt \(1-\alpha/2=0{,}975\). Die
+benötigten Quantile der Student-\(t\)-Verteilung sind:
+\[
+\begin{array}{c|c|c}
+n & \text{Freiheitsgrade }n-1 & t_{n-1,\,0{,}975}\\
+\hline
+2 & 1 & 12{,}706\\
+3 & 2 & 4{,}303\\
+11 & 10 & 2{,}228\\
+101 & 100 & 1{,}984
+\end{array}
+\]
+
+\end{document}
