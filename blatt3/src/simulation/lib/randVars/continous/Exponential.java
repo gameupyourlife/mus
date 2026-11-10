@@ -11,58 +11,56 @@ import simulation.lib.rng.RNG;
  * Expnential distributed random variable.
  */
 public class Exponential extends RandVar {
+	private double lambda;
 
 	public Exponential(RNG rng) {
+		this.lambda = 1;
 		super(rng);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public double getRV() {
-		// TODO Auto-generated method stub
-		return 0;
+		// Erzeugung durch Inversion: U ~ U(0,1), X= -ln(U)/λ
+		return (-Math.log(rng.rnd()) / lambda);
 	}
 
 	@Override
 	public double getMean() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1 / lambda;
 	}
 
 	@Override
 	public double getVariance() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1 / Math.pow(lambda, 2);
 	}
 
 	@Override
 	public void setMean(double m) {
-		// TODO Auto-generated method stub
-
+		this.lambda = 1 / m;
 	}
 
 	@Override
 	public void setStdDeviation(double s) {
-		// TODO Auto-generated method stub
-
+		this.lambda = 1 / s;
 	}
 
 	@Override
 	public void setMeanAndStdDeviation(double m, double s) {
-		// TODO Auto-generated method stub
+		if (m != s) {
+			throw new UnsupportedOperationException("Mean and standard deviation must be equal for exponential distribution.");
+		}
 
+		this.lambda = 1 / m;
 	}
 
 	@Override
 	public String getType() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Exponential";
 	}
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Exponential{lambda=" + lambda + '}';
 	}
 
 }
