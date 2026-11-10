@@ -24,10 +24,11 @@ public class StdRNG extends RNG {
 	 */
 	@Override
 	public void setSeed(long seed) {
-		/*
-		 * TODO Problem 3.1.1 - setSeed
-		 * Update the seed of your random number generator rng (Hint: rng can be null @see RNG)
-		 */
+		if (rng == null) {
+			rng = new Random(seed);
+		} else {
+			rng.setSeed(seed);
+		}
 	}
 
 	/**
@@ -35,11 +36,6 @@ public class StdRNG extends RNG {
 	 */
 	@Override
 	public double rnd() {
-		/*
-		 * TODO Problem 3.1.1 - rnd
-		 * Create a random value: 0 < value < 1
-		 */
-		double rv = 0;
-		return rv;
+		return rng.nextDouble();
 	}
 }
