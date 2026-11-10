@@ -9,7 +9,8 @@ Examples:
     python plot_histograms.py all_runs --outdir comparison
 
 The script reads every histogram CSV from <folder>/histograms and writes four
-PNGs per observed variable into <folder>/plots.
+PNGs per observed variable into <folder>/plots. Use --pdf to write a single
+histograms.pdf with one page per observed variable instead.
 
 If <folder> does not contain a histograms directory itself, it is treated as a
 collection: every subfolder that does contain one is processed in turn and gets
@@ -30,8 +31,10 @@ import math
 import sys
 from itertools import accumulate
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 
 # ---------------------------------------------------------------------------
@@ -160,7 +163,8 @@ def plot_pdf(ax, meta, columns):
     Probability density as a step function (from <variable>_pdf.csv).
 
     Same three columns as above, but the values are additionally divided by
-    the interval width, so the area under the steps is 1.
+    the interval width, so the area under the steps is 1. The Java histogram
+    includes out-of-range samples in the first and last bins.
 
     ax.stairs(values, edges) needs one edge more than values: for n intervals
     n+1 boundaries. That is why the last upper bound is appended to the list
@@ -197,9 +201,9 @@ def plot_distribution(ax, meta, columns):
     csvReport()).
 
     The cumulative distribution function F(x) = P(X <= x) is obtained by
-    summing them up; accumulate() from itertools does exactly that. The curve
-    has to reach 1 at the right edge - if it does not, samples fell outside
-    the histogram bounds.
+    summing the bin frequencies with accumulate() from itertools. The curve
+    reaches 1 even when samples fell outside the histogram bounds, because
+    the Java histogram includes them in the first and last bins.
 
     Things to try:
       - add ax.axhline(0.95) and read off the 95% quantile
@@ -212,7 +216,7 @@ def plot_distribution(ax, meta, columns):
     ax.plot(centers, values, marker="o", markersize=3, linewidth=1,
             color=COLOR_BARS, label="values from file")
     ax.plot(centers, cumulative, linewidth=2,
-            color=COLOR_LINE, label="cumulative sum: F(x)")
+            color=COLOR_LINE, label="Cumulative binned frequency")
 
     ax.set_title("Distribution")
     ax.set_xlabel(meta["variable"])
@@ -233,12 +237,7 @@ PLOT_KINDS = [
 
 #################### OUTPUT FILES
 
-def plot_variable(name, files, out_dir, show=False):
-    """
-    Create three single PNGs and one overview PNG for a single variable.
-
-    Returns the list of files written.
-    """
+def read_plot_data(name, files):
     data = {}
     for kind, _ in PLOT_KINDS:
         path = files.get(kind)
@@ -252,6 +251,12 @@ def plot_variable(name, files, out_dir, show=False):
                   .format(name, kind), file=sys.stderr)
             continue
         data[kind] = (meta, columns)
+    return data
+
+
+def plot_variable(name, files, out_dir, show=False):
+    """Create three single PNGs and an overview PNG for one variable."""
+    data = read_plot_data(name, files)
 
     if not data:
         return []
@@ -288,6 +293,36 @@ def plot_variable(name, files, out_dir, show=False):
     written.append(target)
 
     return written
+
+
+def write_pdf_report(run_dir, target):
+    """Write the existing plots on one portrait page per variable."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    pages = 0
+    with TemporaryDirectory(dir=target.parent) as temp_dir:
+        temporary_pdf = Path(temp_dir) / target.name
+        with PdfPages(temporary_pdf, metadata={"Title": "Random variable histograms"}) as pdf:
+            for name, files in collect_histograms(run_dir).items():
+                data = read_plot_data(name, files)
+                if not data:
+                    continue
+                kinds = [(kind, plot) for kind, plot in PLOT_KINDS if kind in data]
+                fig, axes = plt.subplots(len(kinds), 1, squeeze=False, figsize=(8.27, 11.69))
+                for ax, (kind, plot_function) in zip(axes.flat, kinds):
+                    meta, columns = data[kind]
+                    plot_function(ax, meta, columns)
+                    ax.set_xlabel("Sample value")
+                fig.suptitle(next(iter(data.values()))[0]["variable"], y=0.965, fontsize=17)
+                fig.text(0.10, 0.035, "The first and last bins include samples outside the histogram bounds.",
+                         fontsize=9)
+                fig.tight_layout(rect=(0.08, 0.06, 0.92, 0.93), h_pad=2)
+                pdf.savefig(fig)
+                plt.close(fig)
+                pages += 1
+        if pages == 0:
+            raise ValueError(f"No histogram data to plot in {run_dir}")
+        temporary_pdf.replace(target)
+    return pages
 
 
 def process_run(run_dir, out_dir, prefix="", show=False):
@@ -329,7 +364,11 @@ def main():
                              "(default: a plots subfolder inside each run)")
     parser.add_argument("--show", action="store_true",
                         help="also display the plots in a window")
+    parser.add_argument("--pdf", action="store_true",
+                        help="write a PDF with one page per variable instead of PNGs")
     args = parser.parse_args()
+    if args.pdf and args.show:
+        parser.error("--pdf and --show cannot be combined")
 
     if not args.run_dir.is_dir():
         parser.error("{} is not a folder".format(args.run_dir))
@@ -356,6 +395,12 @@ def main():
             out_dir = run_dir / "plots"
             prefix = ""
 
+        if args.pdf:
+            target = out_dir / (prefix + "histograms.pdf")
+            pages = write_pdf_report(run_dir, target)
+            print(f"{pages} pages written to {target}")
+            continue
+
         variables, pngs = process_run(run_dir, out_dir, prefix, show=args.show)
         total_variables += variables
         total_pngs += pngs
@@ -364,7 +409,7 @@ def main():
             print("\n{} variables, {} PNGs written to {}"
                   .format(variables, pngs, out_dir))
 
-    if multiple:
+    if multiple and not args.pdf:
         print("\n{} runs, {} variables, {} PNGs written"
               .format(len(runs), total_variables, total_pngs))
 
