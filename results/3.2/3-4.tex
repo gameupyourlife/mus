@@ -1,0 +1,79 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+
+\begin{document}
+
+\section*{Blatt 3, Aufgaben 3.2.3 und 3.2.4}
+
+Für jede Kombination aus Verteilung, Variationskoeffizient (CV) und
+Stichprobengröße wurden 500 Stichproben mit wahrem Mittelwert \(\mu=10\)
+simuliert. Für jede Stichprobe berechnet \texttt{study.DCCTest} beide
+Konfidenzintervalle aus denselben Ziehungen. Die Tabellen zeigen, wie oft
+die Intervalle den Wert 10 enthielten. Pro Zelle steht zuerst die
+Überdeckung des 90\,\%-Intervalls, dann die des 95\,\%-Intervalls, jeweils
+in Prozent. Der Zufallszahlengenerator verwendet den festen Startwert 42.
+
+\subsection*{Normalverteilung}
+
+\begin{center}
+\begin{tabular}{@{}rcccc@{}}
+\toprule
+CV & \(n=5\) & \(n=10\) & \(n=50\) & \(n=100\) \\
+\midrule
+0,25 & 91,0 / 95,4 & 89,6 / 94,0 & 91,8 / 96,0 & 90,6 / 94,6 \\
+0,5  & 90,8 / 95,0 & 88,8 / 93,0 & 90,0 / 93,6 & 92,0 / 95,8 \\
+1    & 90,8 / 94,4 & 89,2 / 95,0 & 91,8 / 95,0 & 91,4 / 96,2 \\
+2    & 91,2 / 96,4 & 89,4 / 94,6 & 91,4 / 96,4 & 91,8 / 97,2 \\
+4    & 90,0 / 95,4 & 89,2 / 96,4 & 88,4 / 95,2 & 89,8 / 95,6 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Schon bei \(n=5\) liegen die Trefferquoten nahe bei den Sollwerten. Das
+passt zum \(t\)-Intervall für normalverteilte Daten. Ein höherer CV macht
+die Intervalle breiter. Die theoretische Trefferquote bleibt dabei gleich,
+weil die Streuung sowohl die Abweichung des Stichprobenmittels als auch
+den geschätzten Standardfehler im selben Verhältnis vergrößert. Bei 500
+Wiederholungen beträgt der Monte-Carlo-Standardfehler nahe den Sollwerten
+rund 1,34 bzw. 0,97 Prozentpunkte.
+
+\subsection*{Erlang-, Exponential- und Hyperexponentialverteilung}
+
+\begin{center}
+\begin{tabular}{@{}lrcccc@{}}
+\toprule
+Verteilung & CV & \(n=5\) & \(n=10\) & \(n=50\) & \(n=100\) \\
+\midrule
+Erlang (\(k=16\)) & 0,25 & 89,6 / 94,6 & 90,8 / 94,4 & 89,4 / 95,6 & 88,6 / 95,2 \\
+Erlang (\(k=4\))  & 0,5  & 85,2 / 91,8 & 89,6 / 94,4 & 90,0 / 93,8 & 90,0 / 95,4 \\
+Erlang (\(k=1\))  & 1    & 83,0 / 88,0 & 86,0 / 90,6 & 89,6 / 93,6 & 88,2 / 94,0 \\
+Exponential      & 1    & 80,8 / 87,2 & 84,2 / 88,8 & 86,6 / 92,6 & 87,8 / 94,0 \\
+\(H_2\), gleiche Raten & 1 & 83,8 / 91,0 & 83,0 / 87,8 & 87,6 / 92,2 & 91,0 / 94,8 \\
+\(H_2\)          & 2    & 64,8 / 71,8 & 65,2 / 72,4 & 82,4 / 86,0 & 87,0 / 91,0 \\
+\(H_2\)          & 4    & 46,6 / 52,8 & 39,6 / 45,2 & 62,2 / 64,2 & 72,8 / 76,2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Bei Erlang gilt \(\mathrm{CV}=1/\sqrt{k}\), daher passen aus der Vorgabe
+nur \(k=16,4,1\). Die Exponentialverteilung hat immer CV~1.
+Für \(H_2\) gilt \(\mathrm{CV}\geq1\). Bei CV~1 ergeben gleiche Raten
+ebenfalls eine Exponentialverteilung. Die drei Zeilen mit dieser
+Verteilung beruhen auf verschiedenen Ziehungen und fallen deshalb
+etwas unterschiedlich aus.
+
+Die Rechtsschiefe macht sich vor allem bei kleinen Stichproben bemerkbar.
+Bei der Exponentialverteilung enthält das 95\,\%-Intervall für \(n=5\)
+den Mittelwert nur in 87,2\,\% der Fälle. Bei \(n=100\) sind es 94,0\,\%.
+Für \(H_2\) mit CV~4 bleibt der Abstand deutlich größer. Die langsame Phase
+tritt pro Ziehung nur mit rund 3\,\% Wahrscheinlichkeit auf und erzeugt
+besonders große Werte. Kleine Stichproben erfassen diese Phase oft gar
+nicht. Dann können sowohl der geschätzte Mittelwert als auch der
+geschätzte Standardfehler zu klein ausfallen. Selbst bei \(n=100\)
+enthalten hier nur 76,2\,\% der 95\,\%-Intervalle den Mittelwert.
+
+\end{document}
