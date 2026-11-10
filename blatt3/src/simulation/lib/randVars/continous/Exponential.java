@@ -4,29 +4,34 @@ import simulation.lib.randVars.RandVar;
 import simulation.lib.rng.RNG;
 
 /*
- * TODO Problem 3.1.2 - implement this class (section 3.2.2 in course syllabus)
- * !!! If an abstract class method does not make sense to be implemented in a particular RandVar class,
- * an UnsupportedOperationException should be thrown !!!
- *
- * Expnential distributed random variable.
+ * Exponentially distributed random variable.
  */
 public class Exponential extends RandVar {
 	private double lambda;
 
 	public Exponential(RNG rng) {
-		this.lambda = 1;
-		super(rng);
+		this(rng, 1.0);
 	}
 
 	public Exponential(RNG rng, double lambda) {
-		this.lambda = lambda;
 		super(rng);
+		setRate(lambda);
+	}
+
+	private void setRate(double lambda) {
+		if (!Double.isFinite(lambda) || lambda <= 0.0) {
+			throw new IllegalArgumentException("Rate must be finite and positive.");
+		}
+		this.lambda = lambda;
 	}
 
 	@Override
 	public double getRV() {
-		// Erzeugung durch Inversion: U ~ U(0,1), X= -ln(U)/λ
-		return (-Math.log(rng.rnd()) / lambda);
+		return sample(rng, lambda);
+	}
+
+	static double sample(RNG rng, double rate) {
+		return -Math.log1p(-rng.rnd()) / rate;
 	}
 
 	@Override
@@ -36,26 +41,52 @@ public class Exponential extends RandVar {
 
 	@Override
 	public double getVariance() {
-		return 1 / Math.pow(lambda, 2);
+		double mean = getMean();
+		return mean * mean;
+	}
+
+	@Override
+	public double getStdDeviation() {
+		return getMean();
+	}
+
+	@Override
+	public double getCvar() {
+		return 1.0;
 	}
 
 	@Override
 	public void setMean(double m) {
-		this.lambda = 1 / m;
+		setRate(1.0 / m);
 	}
 
 	@Override
 	public void setStdDeviation(double s) {
-		this.lambda = 1 / s;
+		setMean(s);
 	}
 
 	@Override
 	public void setMeanAndStdDeviation(double m, double s) {
+		if (!Double.isFinite(m) || m <= 0.0 || !Double.isFinite(s) || s <= 0.0) {
+			throw new IllegalArgumentException("Mean and standard deviation must be finite and positive.");
+		}
 		if (m != s) {
 			throw new UnsupportedOperationException("Mean and standard deviation must be equal for exponential distribution.");
 		}
+		setMean(m);
+	}
 
-		this.lambda = 1 / m;
+	@Override
+	public void setCvar(double c) {
+		if (c != 1.0) {
+			throw new UnsupportedOperationException("Exponential CV is always 1.");
+		}
+	}
+
+	@Override
+	public void setMeanAndCvar(double m, double c) {
+		setCvar(c);
+		setMean(m);
 	}
 
 	@Override
