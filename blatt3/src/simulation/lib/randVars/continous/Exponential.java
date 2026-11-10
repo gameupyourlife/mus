@@ -18,6 +18,11 @@ public class Exponential extends RandVar {
 		super(rng);
 	}
 
+	public Exponential(RNG rng, double lambda) {
+		this.lambda = lambda;
+		super(rng);
+	}
+
 	@Override
 	public double getRV() {
 		// Erzeugung durch Inversion: U ~ U(0,1), X= -ln(U)/λ
