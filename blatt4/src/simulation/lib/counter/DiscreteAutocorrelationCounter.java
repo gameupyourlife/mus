@@ -1,48 +1,104 @@
 package simulation.lib.counter;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * This class implements a discrete time autocorrelation counter
- */
-public class DiscreteAutocorrelationCounter {
-	/*
-	 * TODO Problem 4.2.1 - Implement this class according to the given class diagram!
-	 * Hint: see section 4.4 in course syllabus
-	 */
+/** Estimates the autocovariance and autocorrelation of a discrete sample series. */
+public class DiscreteAutocorrelationCounter extends DiscreteCounter {
+    // Keep the series so increasing maxLag also works for samples already counted.
+    private final List<Double> samples = new ArrayList<>();
+    private int maxLag;
 
+    public DiscreteAutocorrelationCounter(int maxLag) {
+        this(null, maxLag);
+    }
 
-	/**
-	 * @see Counter#report()
-	 * TODO Uncomment this function if you have implemented the class!
-	 */
-	/*@Override
-	public String report() {
-		String out  = super.report();
-		out += ("\n\tCorrelation/Covariance:\n");
-		for(int i = 0; i <= (getNumSamples() < maxLag ? getNumSamples() : maxLag); i++){
-			out += ("\t\tlag = " + i + "   " +
-					"covariance = " + getAutoCovariance(i) + "   " +
-					"correlation = " + getAutoCorrelation(i)+"\n");
-		}
-		return out;
-	}*/
-	/**
-	 * @see Counter#csvReport(String)
-	 * TODO Uncomment this function if you have implemented the class!
-	 */
-	/*@Override
-	public void csvReport(String outputdir){
-	    String content = "";
-        for(int i = 0; i <= (getNumSamples() < maxLag ? getNumSamples() : maxLag); i++) {
-            content += observedVariable + " (lag=" + i + ")" + ";" + getNumSamples() + ";" + getMean() + ";" +
-                    getVariance() + ";" + getStdDeviation() + ";" + getCvar() + ";" + getMin() + ";" + getMax() + ";" +
-                    getAutoCovariance(i) + ";" + getAutoCorrelation(i) + "\n";
+    public DiscreteAutocorrelationCounter(String variable, int maxLag) {
+        super(variable);
+        setMaxLag(maxLag);
+    }
+
+    public DiscreteAutocorrelationCounter(String variable, String type, int maxLag) {
+        this(variable, maxLag);
+        statisticsType = type;
+    }
+
+    public int getMaxLag() {
+        return maxLag;
+    }
+
+    public void setMaxLag(int maxLag) {
+        if (maxLag < 0) {
+            throw new IllegalArgumentException("Maximum lag must be nonnegative");
         }
-        String labels = "#counter ; numSamples ; MEAN; VAR; STD; CVAR; MIN; MAX; COV; CORR\n";
-        writeCsv(outputdir, content, labels);
-	}*/
+        this.maxLag = maxLag;
+    }
+
+    @Override
+    public void count(double value, long time) {
+        super.count(value, time);
+        samples.add(value);
+    }
+
+    /** Returns the mean centered cross-product of the n - lag available pairs. */
+    public double getAutoCovariance(int lag) {
+        if (lag < 0 || lag > maxLag) {
+            throw new IllegalArgumentException("Lag must be between 0 and " + maxLag);
+        }
+        int pairs = samples.size() - lag;
+        if (pairs <= 0) {
+            return Double.NaN;
+        }
+        if (getMin() == getMax()) {
+            return 0;
+        }
+
+        double mean = getMean();
+        double sum = 0;
+        for (int i = 0; i < pairs; i++) {
+            sum += (samples.get(i) - mean) * (samples.get(i + lag) - mean);
+        }
+        return sum / pairs;
+    }
+
+    public double getAutoCorrelation(int lag) {
+        return getAutoCovariance(lag) / getAutoCovariance(0);
+    }
+
+    @Override
+    public String report() {
+        StringBuilder out = new StringBuilder(super.report());
+        out.append("\n\tCorrelation/Covariance:\n");
+        double variance = getAutoCovariance(0);
+        for (int lag = 0; lag <= maxLag; lag++) {
+            double covariance = lag == 0 ? variance : getAutoCovariance(lag);
+            out.append("\t\tlag = ").append(lag)
+                .append("   covariance = ").append(covariance)
+                .append("   correlation = ").append(covariance / variance).append('\n');
+        }
+        return out.toString();
+    }
+
+    @Override
+    public void csvReport(String outputdir) {
+        StringBuilder content = new StringBuilder();
+        double variance = getAutoCovariance(0);
+        for (int lag = 0; lag <= maxLag; lag++) {
+            double covariance = lag == 0 ? variance : getAutoCovariance(lag);
+            content.append(observedVariable).append(';').append(getNumSamples()).append(';')
+                .append(lag).append(';').append(covariance).append(';')
+                .append(covariance / variance).append('\n');
+        }
+        writeCsv(outputdir, content.toString(), "#variable;numSamples;lag;covariance;correlation\n");
+    }
+
+    public void reset() {
+        reset(0);
+    }
+
+    @Override
+    public void reset(long time) {
+        super.reset(time);
+        samples.clear();
+    }
 }
