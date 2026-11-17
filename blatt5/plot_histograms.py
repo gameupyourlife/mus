@@ -58,32 +58,24 @@ def parse_number(text):
 
 
 def read_histogram_csv(path):
-    """
-    Read one of the three histogram CSV files.
-
-    The files use a semicolon as column separator and a comma as decimal
-    separator. The first three lines are comments: type, variable name and
-    column headings.
-
-    Returns (meta, columns):
-        meta    - dict with the keys "type" and "variable"
-        columns - list of columns, each one a list of floats
-    """
+    """Read a comma-separated histogram or an older semicolon-separated export."""
     comments = []
     rows = []
-
     with open(path, newline="", encoding="utf-8") as handle:
-        for cells in csv.reader(handle, delimiter=";"):
+        first_line = next(handle, "")
+        legacy_format = first_line.startswith("#")
+        delimiter = ";" if legacy_format else ","
+        for cells in csv.reader(handle, delimiter=delimiter):
             if not cells or not cells[0].strip():
                 continue
-            if cells[0].lstrip().startswith("#"):
-                comments.append(";".join(cells).lstrip("#").strip())
+            if legacy_format and cells[0].lstrip().startswith("#"):
+                comments.append(delimiter.join(cells).lstrip("#").strip())
                 continue
             rows.append([parse_number(cell) for cell in cells])
 
     meta = {
-        "type": comments[0] if comments else "",
-        "variable": comments[1] if len(comments) > 1 else path.stem,
+        "type": first_line.lstrip("#").strip() if legacy_format else "",
+        "variable": comments[0] if comments else path.stem.rsplit("_", 1)[0],
     }
     columns = [list(column) for column in zip(*rows)] if rows else []
     return meta, columns

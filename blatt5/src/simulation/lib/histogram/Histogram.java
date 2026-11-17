@@ -132,27 +132,23 @@ public abstract class Histogram extends StatisticObject{
 			FileWriter pdfWriter = new FileWriter(dest + "/" + observedVariable + "_pdf.csv");
 			FileWriter distWriter = new FileWriter(dest + "/" + observedVariable + "_dist.csv");
 			
-			histWriter.append("#" + statisticsType + "\n#" + observedVariable + "\n");
-			pdfWriter.append("#" + statisticsType + "\n#" + observedVariable + "\n");
-			distWriter.append("#" + statisticsType + "\n#" + observedVariable + "\n");
-			
-			histWriter.append("#lowerBound ; upperBound ; relative frequency\n");
-			pdfWriter.append("#lowerBound ; upperBound ; probability density\n");
-			distWriter.append("#(lowerBound+upperBound)/2 ; probability\n");
+			histWriter.append("lowerBound,upperBound,relative frequency\n");
+			pdfWriter.append("lowerBound,upperBound,probability density\n");
+			distWriter.append("(lowerBound+upperBound)/2,probability\n");
 			
 			String hist = "";
 			String pdf = "";
 			String dist = "";
 			
 			for (int i = 0; i < getNumIntervals(); i++) {
-				hist += (getLowerBound() + i * getDelta()) + ";" + (getLowerBound() + (i + 1) * getDelta()) + ";" + getBinValue(i) / getNormalizingFactor() + "\n";
-				pdf += (getLowerBound() + i * getDelta()) + ";" + (getLowerBound() + (i + 1) * getDelta()) + ";" + getBinValue(i) / getNormalizingFactor() / getDelta() + "\n";
-				dist += (getLowerBound() + (i + 0.5) * getDelta()) + ";" + getBinValue(i) / getNormalizingFactor() + "\n";
+				hist += (getLowerBound() + i * getDelta()) + "," + (getLowerBound() + (i + 1) * getDelta()) + "," + getBinValue(i) / getNormalizingFactor() + "\n";
+				pdf += (getLowerBound() + i * getDelta()) + "," + (getLowerBound() + (i + 1) * getDelta()) + "," + getBinValue(i) / getNormalizingFactor() / getDelta() + "\n";
+				dist += (getLowerBound() + (i + 0.5) * getDelta()) + "," + getBinValue(i) / getNormalizingFactor() + "\n";
 			}
 			
-			histWriter.append(hist.replace('.', ','));
-			pdfWriter.append(pdf.replace('.', ','));
-			distWriter.append(dist.replace('.', ','));
+			histWriter.append(hist);
+			pdfWriter.append(pdf);
+			distWriter.append(dist);
 			
 			histWriter.close();
 			pdfWriter.close();

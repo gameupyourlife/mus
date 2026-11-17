@@ -1,9 +1,5 @@
 package simulation.lib.counter;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
 /**
  * This class implements a discrete time confidence counter with relativ error.
  */
@@ -31,11 +27,12 @@ public class DiscreteConfidenceCounterWithRelativeError extends DiscreteConfiden
 	 * @return maximal relative error
 	 */
 	public double maxRelErr() {
-		if((getNumSamples() > 2) && (Math.abs(getMean()) > getBound())){
-			return(getBound() / (Math.abs(getMean()) - getBound()));
-		}else{
+		if (getNumSamples() < 2) {
 			return Double.POSITIVE_INFINITY;
 		}
+		double bound = getBound();
+		double closestToZero = Math.abs(getMean()) - bound;
+		return closestToZero > 0 ? bound / closestToZero : Double.POSITIVE_INFINITY;
 	}
 
 	/**
@@ -52,21 +49,22 @@ public class DiscreteConfidenceCounterWithRelativeError extends DiscreteConfiden
 	@Override
 	public String report() {
 		String out  = super.report();
-		out += ("\tmaximum relative error = " + maxRelErr() + "\n"
+		out += ("\n\tmaximum relative error = " + maxRelErr() + "\n"
 				+ "\tmaximum absolute error = " + maxAbsErr() + "\n");
 		return out;
 	}
 	
-	/**
-	 * @see Counter#csvReport(String)
-	 */
+	/** Adds the error columns to the confidence counter's CSV row. */
 	@Override
-	public void csvReport(String outputdir){
-	    String content = observedVariable + ";" + getNumSamples() + ";" + getMean() + ";" + getVariance()  + ";" + getStdDeviation() + ";"
-                + getCvar() + ";" + getMin() + ";" + getMax() + ";" + alpha + ";" + getZ(getNumSamples()) + ";" + getLowerBound() + ";" +
-                ";" + getUpperBound() + ";" + maxRelErr() + ";" + maxAbsErr() + "\n";
-	    String labels = "#counter ; numSamples ; MEAN; VAR; STD; CVAR; MIN; MAX;"
-                + "alpha;tz(1-alpha/2);lowerBound;upperBound;maxRelErr;maxAbsErr\n";
-	    writeCsv(outputdir, content, labels);
+	protected void writeCsv(String outputdir, String content, String labels) {
+		// Blatt 3's confidence counter also calls this method, with semicolon-separated fields.
+		if (labels.startsWith("#")) {
+			String values = content.substring(String.valueOf(observedVariable).length());
+			content = csvVariable() + values.replace(';', ',');
+			labels = labels.substring(1).replace(" ", "").replace(';', ',');
+		}
+		super.writeCsv(outputdir,
+				content.stripTrailing() + "," + maxRelErr() + "," + maxAbsErr() + "\n",
+				labels.stripTrailing() + ",maxRelErr,maxAbsErr\n");
 	}
 }

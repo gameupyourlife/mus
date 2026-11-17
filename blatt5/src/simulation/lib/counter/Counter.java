@@ -153,9 +153,14 @@ public abstract class Counter extends StatisticObject{
 	 * Write Counter details to csv-file.
 	 */
 	public void csvReport(String outputdir){
-		String content = observedVariable + ";" + numSamples + ";" + getMean() + ";" + getVariance()  + ";" + getStdDeviation() + ";" + getCvar() + ";" + getMin() + ";" + getMax() + "\n";
-		String labels = "#" + statisticsType + "\n" + "#variable ; numSamples ; MEAN; VAR; STD; CVAR; MIN; MAX\n";
+		String content = csvVariable() + "," + numSamples + "," + getMean() + "," + getVariance() + ","
+				+ getStdDeviation() + "," + getCvar() + "," + getMin() + "," + getMax() + "\n";
+		String labels = "variable,numSamples,MEAN,VAR,STD,CVAR,MIN,MAX\n";
 		writeCsv(outputdir, content, labels);
+	}
+
+	protected String csvVariable() {
+		return "\"" + String.valueOf(observedVariable).replace("\"", "\"\"") + "\"";
 	}
 
 	protected void writeCsv(String outputdir, String content, String labels) {

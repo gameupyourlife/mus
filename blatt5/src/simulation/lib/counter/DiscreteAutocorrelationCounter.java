@@ -85,11 +85,11 @@ public class DiscreteAutocorrelationCounter extends DiscreteCounter {
         double variance = getAutoCovariance(0);
         for (int lag = 0; lag <= maxLag; lag++) {
             double covariance = lag == 0 ? variance : getAutoCovariance(lag);
-            content.append(observedVariable).append(';').append(getNumSamples()).append(';')
-                .append(lag).append(';').append(covariance).append(';')
+            content.append(csvVariable()).append(',').append(getNumSamples()).append(',')
+                .append(lag).append(',').append(covariance).append(',')
                 .append(covariance / variance).append('\n');
         }
-        writeCsv(outputdir, content.toString(), "#variable;numSamples;lag;covariance;correlation\n");
+        writeCsv(outputdir, content.toString(), "variable,numSamples,lag,covariance,correlation\n");
     }
 
     public void reset() {
