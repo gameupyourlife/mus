@@ -50,6 +50,15 @@ public class SimulationState {
 	}
 
 	/**
+	 * Indicates if transient phase is over. (Initialisation is over)
+	 * @return true if phase is over
+	 */
+	public boolean isTransientPhaseOver() {
+		//TODO: Task 5.1.1: Implement this function to return true if the transient phase is over, false otherwise.
+		return true;
+	}
+
+	/**
 	 * Increases number of samples
 	 */
     public void increaseNumSamplesByOne() {

@@ -162,6 +162,7 @@ public class Simulator {
 			sims.updateOnCustomerArrival(state, getSimTime());
 		}else if(sender.getClass() == ServiceCompletionEvent.class){
 			sims.updateOnServiceCompletion(state, (Customer) arg, getSimTime());
+			//TODO 5.1: Check if the Simulation is finished (see SimulationStudy.isSimulationFinished()). If so, terminate the Simulation.
 		}
 	}
 	
@@ -179,9 +180,9 @@ public class Simulator {
 	 */
 	public void pushNewEventHandler(Class<?> c) {
 		if (c == CustomerArrivalEvent.class) {
-			pushNewEvent(new CustomerArrivalEvent(state, this.getSimTime() + realTimeToSimTime(sims.getNextInterArrivalTime())));
+			pushNewEvent(new CustomerArrivalEvent(state, this.getSimTime() + realTimeToSimTime(sims.randVarInterArrivalTime.getRV())));
 		}else if(c == ServiceCompletionEvent.class){
-			pushNewEvent(new ServiceCompletionEvent(state, this.getSimTime() + realTimeToSimTime(sims.getNextServiceTime())));
+			pushNewEvent(new ServiceCompletionEvent(state, this.getSimTime() + realTimeToSimTime(sims.randVarServiceTime.getRV())));	
 		}
 	}
 

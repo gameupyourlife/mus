@@ -1,5 +1,5 @@
 /**
- *
+ * 
  */
 package simulation.lib.randVars.continous;
 
@@ -64,7 +64,7 @@ public class Exponential extends RandVar {
 	@Override
 	public void setMean(double mean) {
 		if(mean <= 0)
-			throw new IllegalArgumentException("mean must not be lower or equal to 0");
+			throw new IllegalArgumentException("mean must not be lower equals 0");
         lambda = (1 / mean);
 	}
 
@@ -74,13 +74,8 @@ public class Exponential extends RandVar {
 	@Override
 	public void setMeanAndStdDeviation(double mean, double sdev) {
         if (mean != sdev)
-            throw new IllegalArgumentException("Mean must be equal to the standard deviation!");
+            throw new UnsupportedOperationException("Mean must be equal standard deviation!");
         lambda = 1 / mean;
-	}
-
-	@Override
-	public void setCvar(double c) {
-		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -101,9 +96,9 @@ public class Exponential extends RandVar {
 
 	@Override
 	public String toString() {
-		return super.toString() +
+		return super.toString() + 
 			"\tparameters:\n" +
 			"\t\tlambda: " + lambda + "\n";
-	}
-
+	}	
+	
 }
