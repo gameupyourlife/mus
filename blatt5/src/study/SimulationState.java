@@ -33,7 +33,7 @@ public class SimulationState {
 	 */
 	public long numSamples;
 
-	private SimulationStudy sims;
+	private final SimulationStudy sims;
 
 	/**
 	 * Constructor
@@ -50,12 +50,11 @@ public class SimulationState {
 	}
 
 	/**
-	 * Indicates if transient phase is over. (Initialisation is over)
-	 * @return true if phase is over
+	 * Indicates whether the current completion is past the discarded samples.
+	 * The service completion event increments numSamples before updating statistics.
 	 */
 	public boolean isTransientPhaseOver() {
-		//TODO: Task 5.1.1: Implement this function to return true if the transient phase is over, false otherwise.
-		return true;
+		return numSamples > sims.ninit;
 	}
 
 	/**

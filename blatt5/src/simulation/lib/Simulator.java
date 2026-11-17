@@ -1,9 +1,11 @@
 package simulation.lib;
 
+import java.util.function.Function;
+
 import simulation.lib.event.CustomerArrivalEvent;
 import simulation.lib.event.Event;
 import simulation.lib.event.ServiceCompletionEvent;
-import simulation.lib.event.SimulationTerminationEvent;
+import simulation.lib.randVars.RandVar;
 import study.SimulationState;
 import study.SimulationStudy;
 
@@ -32,14 +34,26 @@ public class Simulator {
 	 * Pushes first event (customer arrival event) to queue
 	 */
 	public Simulator() {
+		this(SimulationStudy::new);
+	}
+
+	/** Creates a study with the given warm-up, batch length, and independent time generators. */
+	public Simulator(long ninit, int lbatch, RandVar arrivals, RandVar service) {
+		this(simulator -> new SimulationStudy(simulator, ninit, lbatch, arrivals, service));
+	}
+
+	/** Creates a study with a mean service time of one second. */
+	public Simulator(long ninit, int lbatch, double utilization, double arrivalCvar) {
+		this(simulator -> new SimulationStudy(simulator, ninit, lbatch, utilization, arrivalCvar));
+	}
+
+	private Simulator(Function<Simulator, SimulationStudy> createStudy) {
 		// create event chain
 		ec = new SortableQueue();
-		sims = new SimulationStudy(this);
+		sims = createStudy.apply(this);
 		state = new SimulationState(sims);
 		// push the first customer arrival at t = 0
 		pushNewEvent(new CustomerArrivalEvent(state, 0));
-		// push the termination event at the simulationTime (max duration of simulation)
-		pushNewEvent(new SimulationTerminationEvent(sims.simulationTime));
 	}
 	
 	/**
@@ -162,7 +176,9 @@ public class Simulator {
 			sims.updateOnCustomerArrival(state, getSimTime());
 		}else if(sender.getClass() == ServiceCompletionEvent.class){
 			sims.updateOnServiceCompletion(state, (Customer) arg, getSimTime());
-			//TODO 5.1: Check if the Simulation is finished (see SimulationStudy.isSimulationFinished()). If so, terminate the Simulation.
+			if (sims.isSimulationFinished()) {
+				stop();
+			}
 		}
 	}
 	

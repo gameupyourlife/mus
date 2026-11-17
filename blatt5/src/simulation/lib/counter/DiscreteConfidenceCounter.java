@@ -127,7 +127,7 @@ public class DiscreteConfidenceCounter extends DiscreteCounter {
     @Override
     public String report() {
         String out = super.report();
-        out += ("" + "\talpha = " + alpha + "\n" +
+        out += ("\n\talpha = " + alpha + "\n" +
                 "\tz(1-alpha/2) = " + getZ(getNumSamples() - 1) + "\n" +
                 "\tlower bound = " + getLowerBound() + "\n" +
                 "\tupper bound = " + getUpperBound());
@@ -139,10 +139,10 @@ public class DiscreteConfidenceCounter extends DiscreteCounter {
      */
     @Override
     public void csvReport(String outputdir) {
-        String content = observedVariable + ";" + getNumSamples() + ";" + getMean() + ";" + getVariance() + ";" + getStdDeviation() + ";" +
-                getCvar() + ";" + getMin() + ";" + getMax() + ";" + alpha + ";" + getZ(getNumSamples() - 1) + ";" + getLowerBound() + ";" +
+        String content = csvVariable() + "," + getNumSamples() + "," + getMean() + "," + getVariance() + "," + getStdDeviation() + "," +
+                getCvar() + "," + getMin() + "," + getMax() + "," + alpha + "," + getZ(getNumSamples() - 1) + "," + getLowerBound() + "," +
                 getUpperBound() + "\n";
-        String labels = "#counter ; numSamples ; MEAN; VAR; STD; CVAR; MIN; MAX;alpha;tz(1-alpha/2);lowerBound;upperBound\n";
+        String labels = "counter,numSamples,MEAN,VAR,STD,CVAR,MIN,MAX,alpha,tz(1-alpha/2),lowerBound,upperBound\n";
         writeCsv(outputdir, content, labels);
     }
 
