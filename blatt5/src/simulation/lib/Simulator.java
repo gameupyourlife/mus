@@ -42,6 +42,11 @@ public class Simulator {
 		this(simulator -> new SimulationStudy(simulator, ninit, lbatch, arrivals, service));
 	}
 
+	/** Creates a study with a mean service time of one second. */
+	public Simulator(long ninit, int lbatch, double utilization, double arrivalCvar) {
+		this(simulator -> new SimulationStudy(simulator, ninit, lbatch, utilization, arrivalCvar));
+	}
+
 	private Simulator(Function<Simulator, SimulationStudy> createStudy) {
 		// create event chain
 		ec = new SortableQueue();
