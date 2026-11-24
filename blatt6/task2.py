@@ -111,5 +111,52 @@ plt.xticks(
 )
 plt.grid()
 
-# Display the three plots together in separate figures.
+
+
+
+
+
+
+
+# We intuitively presume, that the employment value and the unemployment rate are correlated. Calculate the mean values (considering all states for each year) for both variables and plot both data series in one plot! The plot should have the years on the x-axis
+# and two y-axes for the mean values of both variables. Finally, calculate the correlation
+# value for the two data series and briefly comment on the results!
+employment_by_year = df.groupby('year')['employment'].mean()
+unemployment_rate_by_year = df.groupby('year')['unemployment rate'].mean()
+
+
+correlation = employment_by_year.corr(unemployment_rate_by_year)
+print(f"Correlation between Employment and Unemployment Rate: {correlation}")
+
+
+
+
+
+
+
+
+plt.figure(figsize=(10, 6))
+
+# Plot the employment data on the first y-axis
+ax1 = plt.gca()
+ax1.plot(employment_by_year.index, employment_by_year.values, marker='o', label='Employment')
+ax1.set_xlabel('Year')
+ax1.set_ylabel('Employment', color='blue')
+ax1.tick_params(axis='y', labelcolor='blue')
+
+# Create a second y-axis for the unemployment rate
+ax2 = ax1.twinx()
+ax2.plot(unemployment_rate_by_year.index, unemployment_rate_by_year.values, marker='s', label='Unemployment Rate', color='red')
+ax2.set_ylabel('Unemployment Rate (%)', color='red')
+ax2.tick_params(axis='y', labelcolor='red')
+
+# Add a title and legend
+plt.title('Employment and Unemployment Rate (1970-1986)')
+# To display the correlation in the legend, we can create a custom legend entry using an empty plot and the correlation value. This way, it will appear in the legend without affecting the actual data plots.
+ax1.plot([], [], ' ', label=f'Correlation: {correlation:.2f}')
+handles1, labels1 = ax1.get_legend_handles_labels()
+handles2, labels2 = ax2.get_legend_handles_labels()
+ax1.legend(handles1 + handles2, labels1 + labels2)
+
+# Show the plot
 plt.show()
