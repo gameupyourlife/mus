@@ -31,6 +31,7 @@ ax2.set(title= 'linear')
 
 ax2.legend()
 fig.suptitle('Taks 6.1.1')
+fig.savefig('Taks 6.1.1.pdf', metadata={'Title': 'Taks 6.1.1'})
 plt.show()
 
 #task 6.1.2
@@ -63,6 +64,7 @@ ax2.set(title= 'linear')
 
 ax2.legend()
 fig.suptitle('Taks 6.1.2')
+fig1.savefig('Taks 6.1.2.pdf', metadata={'Title': 'Taks 6.1.2'})
 plt.show()
 
 #task 6.1.3
@@ -95,4 +97,5 @@ ax2.set(title= 'logarithmic scaling x-axis linear scaling y-axis')
 
 ax2.legend()
 fig.suptitle('Taks 6.1.3')
+fig1.savefig('Taks 6.1.3.pdf', metadata={'Title': 'Taks 6.1.3'})
 plt.show()
