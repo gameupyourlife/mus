@@ -22,7 +22,6 @@ plt.title('Average Unemployment Rate in the United States (1970-1986)')
 plt.xlabel('Year')
 plt.ylabel('Average Unemployment Rate (%)')
 plt.grid()
-plt.show() 
 
 
 # Private capital between 1970 and 1986 for the five states having the highest private capital in average.
@@ -44,7 +43,6 @@ plt.xlabel('Year')
 plt.ylabel('Private Capital')
 plt.legend()
 plt.grid()
-plt.show()
 
 
 # Public capital between 1970 and 1986 for the state having the highest and the state having the lowest public capital in average.
@@ -66,4 +64,52 @@ plt.xlabel('Year')
 plt.ylabel('Public Capital')
 plt.legend()
 plt.grid()
+
+
+
+# Boxplots
+# Unemployment rate between 1970 and 1986 for the two states having the highest
+# unemployment rate on average
+unemployment_by_state = df.groupby('state')['unemployment rate']
+top_two_unemployment_by_state = unemployment_by_state.mean().sort_values(ascending=False).head(2)
+print(top_two_unemployment_by_state)
+    
+# Create a boxplot for the unemployment rate of the two states
+plt.figure(figsize=(10, 6))
+for state in top_two_unemployment_by_state.index:
+    state_data = df[df['state'] == state]
+    plt.boxplot(state_data['unemployment rate'], positions=[list(top_two_unemployment_by_state.index).index(state) + 1], label=state)
+
+plt.title('Unemployment Rate in the Top 2 States (1970-1986)')
+plt.xlabel('State')
+plt.ylabel('Unemployment Rate (%)')
+plt.xticks(
+    range(1, len(top_two_unemployment_by_state) + 1),
+    top_two_unemployment_by_state.index,
+)
+plt.grid()
+
+
+# Highway and street capital between 1970 and 1986 for the two states having the
+# lowest highway and street capital on average.
+highway_street_capital_by_state = df.groupby('state')['highway and street capital']
+lowest_two_highway_street_capital_by_state = highway_street_capital_by_state.mean().sort_values(ascending=True).head(2)
+print(lowest_two_highway_street_capital_by_state)
+
+# Create a boxplot for the highway and street capital of the two states
+plt.figure(figsize=(10, 6))
+for state in lowest_two_highway_street_capital_by_state.index:
+    state_data = df[df['state'] == state]
+    plt.boxplot(state_data['highway and street capital'], positions=[list(lowest_two_highway_street_capital_by_state.index).index(state) + 1], label=state)
+
+plt.title('Highway and Street Capital in the Lowest 2 States (1970-1986)')
+plt.xlabel('State')
+plt.ylabel('Highway and Street Capital')
+plt.xticks(
+    range(1, len(lowest_two_highway_street_capital_by_state) + 1),
+    lowest_two_highway_street_capital_by_state.index,
+)
+plt.grid()
+
+# Display the three plots together in separate figures.
 plt.show()
