@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 # Read the CSV file into a DataFrame
 df = pd.read_csv('blatt6/US_States_Production.csv')
@@ -151,12 +152,39 @@ ax2.set_ylabel('Unemployment Rate (%)', color='red')
 ax2.tick_params(axis='y', labelcolor='red')
 
 # Add a title and legend
-plt.title('Employment and Unemployment Rate (1970-1986)')
+ax1.set_title('Employment and Unemployment Rate (1970-1986)')
 # To display the correlation in the legend, we can create a custom legend entry using an empty plot and the correlation value. This way, it will appear in the legend without affecting the actual data plots.
 ax1.plot([], [], ' ', label=f'Correlation: {correlation:.2f}')
 handles1, labels1 = ax1.get_legend_handles_labels()
 handles2, labels2 = ax2.get_legend_handles_labels()
 ax1.legend(handles1 + handles2, labels1 + labels2)
 
+
+
+# Seperate the original data frames containing all observation in multiple dataframes, containing only observations belonging to a particular US state! Output the observations of
+# the US state Florida as a csv file! 
+
+# dataframes for each state
+states = df['state'].unique()
+for state in states:
+    state_data = df[df['state'] == state]
+
+    if state.lower() == 'florida':
+        state_data.to_csv('florida_observations.csv', index=False)
+
+
 # Show the plot
-plt.show()
+# plt.show()
+
+# Save each plot as a separate PDF named after its title.
+for figure_number in plt.get_fignums():
+    figure = plt.figure(figure_number)
+    titles = [axis.get_title() for axis in figure.axes if axis.get_title()]
+    title = titles[0] if titles else f'Plot {figure_number}'
+    filename = ''.join(
+        '_' if character in '<>:"/\\|?*' else character
+        for character in title
+    ).strip().rstrip('.')
+
+    with PdfPages(f'{filename}.pdf', metadata={'Title': title}) as pdf:
+        pdf.savefig(figure)
