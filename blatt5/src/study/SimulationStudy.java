@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import simulation.lib.Customer;
 import simulation.lib.Simulator;
@@ -23,6 +24,7 @@ import simulation.lib.statistic.StatisticObject;
 public class SimulationStudy {
     static final long DEFAULT_NINIT = 10_000;
     static final int DEFAULT_LBATCH = 20_000;
+    private static final int GRID_BATCHES = 250;
     static final long TICKS_PER_SECOND = 1_000_000;
     private static final double ALPHA = 0.10;
     private static final double RELATIVE_ERROR_LIMIT = 0.05;
@@ -57,9 +59,14 @@ public class SimulationStudy {
     private long zeroWaits;
     private double batchSum;
     private int batchExcessCount;
+    private int fixedBatchCount;
     private boolean simulationFinished;
 
     public static void main(String[] args) {
+        if (args.length == 1 && args[0].equals("--grid")) {
+            runGrid();
+            return;
+        }
         if (args.length > 0 && args[0].equals("--rho")) {
             if (args.length < 2 || args.length > 5) {
                 throw new IllegalArgumentException("Usage: study.SimulationStudy --rho utilization [arrivalCvar [ninit [lbatch]]]");
@@ -84,6 +91,34 @@ public class SimulationStudy {
         Simulator simulator = new Simulator(ninit, lbatch, utilization, arrivalCvar);
         simulator.start();
         simulator.report();
+    }
+
+    private static void runGrid() {
+        System.out.println("utilization,arrivalCvar,warmupSamples,batchLength,batches,waitingSamples,exceedances,"
+            + "meanWaitSeconds,meanWaitLower90Seconds,meanWaitUpper90Seconds,pw5,pw5Lower90,pw5Upper90");
+        for (int step = 1; step <= 19; step++) {
+            double utilization = step / 20.0;
+            for (double arrivalCvar : new double[] {0.5, 1, 2}) {
+                Simulator simulator = new Simulator(DEFAULT_NINIT, DEFAULT_LBATCH, utilization, arrivalCvar);
+                SimulationStudy study = simulator.getStudy();
+                study.fixedBatchCount = GRID_BATCHES;
+                simulator.start();
+                study.printGridRow(utilization, arrivalCvar);
+            }
+        }
+    }
+
+    private void printGridRow(double utilization, double arrivalCvar) {
+        double probabilityLower = Double.NaN;
+        double probabilityUpper = Double.NaN;
+        if (batchExcessWaits.getVariance() > 0) {
+            probabilityLower = Math.max(0, batchExcessWaits.getLowerBound());
+            probabilityUpper = Math.min(1, batchExcessWaits.getUpperBound());
+        }
+        System.out.printf(Locale.ROOT, "%.2f,%.1f,%d,%d,%d,%d,%d,%s,%s,%s,%s,%s,%s%n",
+            utilization, arrivalCvar, ninit, lbatch, batchMeans.getNumSamples(), waits.getNumSamples(),
+            Math.round(excessWaits.getSumPowerOne()), batchMeans.getMean(), Math.max(0, batchMeans.getLowerBound()),
+            batchMeans.getUpperBound(), batchExcessWaits.getMean(), probabilityLower, probabilityUpper);
     }
 
     public SimulationStudy(Simulator sim) {
@@ -176,9 +211,13 @@ public class SimulationStudy {
             batchExcessWaits.count((double) batchExcessCount / lbatch);
             batchSum = 0;
             batchExcessCount = 0;
-            simulationFinished = batchMeans.getNumSamples() >= 2
-                && (batchMeans.maxRelErr() < RELATIVE_ERROR_LIMIT
-                    || batchMeans.maxAbsErr() < ABSOLUTE_ERROR_LIMIT);
+            if (fixedBatchCount > 0) {
+                simulationFinished = batchMeans.getNumSamples() == fixedBatchCount;
+            } else {
+                simulationFinished = batchMeans.getNumSamples() >= 2
+                    && (batchMeans.maxRelErr() < RELATIVE_ERROR_LIMIT
+                        || batchMeans.maxAbsErr() < ABSOLUTE_ERROR_LIMIT);
+            }
         }
     }
 
