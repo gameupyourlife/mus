@@ -164,6 +164,11 @@ public class Simulator {
 	public void report() {
 	    sims.report();
 	}
+
+	/** Returns the study that collects this simulator's results. */
+	public SimulationStudy getStudy() {
+		return sims;
+	}
 	
 
 	/**
