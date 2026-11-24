@@ -1,0 +1,70 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\graphicspath{{figures/}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.7em}
+
+\begin{document}
+
+\section*{6.2}
+
+\textbf{Unemployment over time.}
+The unweighted mean unemployment rate across states fluctuates considerably, with peaks in 1975 (8.05\%) and 1982--1983 (about 9.3\%), followed by a decline to 6.93\% in 1986.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth,height=0.29\textheight,keepaspectratio]{average-unemployment.pdf}
+\caption{Unweighted mean unemployment rate across the 48 states.}
+\end{figure}
+
+\textbf{Private capital.}
+California, New York, Texas, Illinois, and Pennsylvania have the highest average private capital. California and New York remain clearly ahead, while Texas shows sustained growth.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth,height=0.29\textheight,keepaspectratio]{private-capital.pdf}
+\caption{Private capital in the five states with the highest period averages.}
+\end{figure}
+
+\clearpage
+\textbf{Public capital.}
+Average public capital is highest in Texas and lowest in Vermont; both end above their 1970 levels.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth,height=0.29\textheight,keepaspectratio]{public-capital.pdf}
+\caption{Public capital in the states with the highest and lowest period averages.}
+\end{figure}
+
+\textbf{Unemployment boxplots.}
+Michigan and West Virginia have the highest mean unemployment rates (9.69\% and 9.27\%). Michigan has the higher median (8.8\% versus 7.5\%), whereas West Virginia has greater variability and a higher maximum (18\% versus 16\%).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth,height=0.29\textheight,keepaspectratio]{unemployment-boxplots.pdf}
+\caption{Annual unemployment rates in Michigan and West Virginia, 1970--1986.}
+\end{figure}
+
+\clearpage
+
+\textbf{Highway and street capital boxplots.}
+Vermont and Rhode Island have the lowest mean values. Rhode Island has a slightly higher median and roughly twice the interquartile range, indicating greater variation over time.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth,height=0.29\textheight,keepaspectratio]{highway-capital-boxplots.pdf}
+\caption{Annual highway and street capital in Vermont and Rhode Island, 1970--1986.}
+\end{figure}
+
+\textbf{Employment and unemployment.}
+The Pearson correlation between the 17 annual state means is $r \approx 0.505$, indicating a moderate positive association. Employment is an absolute count, whereas unemployment is a share of the labour force, so both can increase when the labour force grows. The correlation of these time series does not establish causation or describe the relationship within individual states.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth,height=0.29\textheight,keepaspectratio]{employment-unemployment.pdf}
+\caption{Annual mean employment and unemployment rate, using separate vertical axes.}
+\end{figure}
+
+\end{document}
